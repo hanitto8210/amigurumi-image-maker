@@ -53,16 +53,27 @@ function setupToggleButton() {
     });
 }
 
-// ===== ユーザーの初回操作で音を有効化（1回だけ再生しておく） =====
-document.addEventListener("click", () => {
-    clickSound.play().catch(() => { }); // エラーは無視
-    clickSound.pause(); // 再生直後に止める（音は聞こえない）
-    clickSound.currentTime = 0;
-}, { once: true });
-
 // ===== 効果音の準備 =====
 const choiceSound = document.getElementById("se-choice");
 const clickSound = document.getElementById("se-click");
+
+// 明示的にロードしておく（スマホ対応）
+clickSound.load();
+choiceSound.load();
+
+// ===== ユーザーの初回操作で音声を有効化（スマホ用に touchstart も） =====
+function unlockAudio() {
+    // すべての音声に対して再生 → 停止 → 時間リセット（音は聞こえない）
+    [clickSound, choiceSound].forEach(sound => {
+        sound.play().catch(() => { });
+        sound.pause();
+        sound.currentTime = 0;
+    });
+}
+
+// 一度だけ初回操作で音声を「許可済み」にする
+document.addEventListener("click", unlockAudio, { once: true });
+document.addEventListener("touchstart", unlockAudio, { once: true });
 
 // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
