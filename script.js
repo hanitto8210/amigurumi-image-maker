@@ -1,4 +1,4 @@
-﻿
+
 // ==============================
 // 初期設定
 // ==============================
@@ -53,6 +53,26 @@ function setupToggleButton() {
     });
 }
 
+// ===== ユーザーの初回操作で音を有効化（1回だけ再生しておく） =====
+document.addEventListener("click", () => {
+    clickSound.play().catch(() => { }); // エラーは無視
+    clickSound.pause(); // 再生直後に止める（音は聞こえない）
+    clickSound.currentTime = 0;
+}, { once: true });
+
+// ===== 効果音の準備 =====
+const choiceSound = document.getElementById("se-choice");
+const clickSound = document.getElementById("se-click");
+
+// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+document.querySelectorAll("button").forEach(button => {
+    if (button.id !== "start-btn") {
+        button.addEventListener("click", () => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+        });
+    }
+});
 
 
 let selectedCharacter = null;
@@ -267,9 +287,6 @@ let currentCategory = "eyes";
 // ボタンを取得
 const buttons = document.querySelectorAll('button');
 
-// ===== 効果音の準備 =====
-const choiceSound = document.getElementById("se-choice");
-const clickSound = document.getElementById("se-click");
 
 // ===== スタートボタンの処理 =====
 function goToCharacterSelect() {
@@ -338,15 +355,6 @@ function selectCharacter(characterId) {
 //    showItems("body");
 //}
 
-// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-document.querySelectorAll("button").forEach(button => {
-    if (button.id !== "start-btn") {
-        button.addEventListener("click", () => {
-            clickSound.currentTime = 0;
-            clickSound.play();
-        });
-    }
-});
 
 function showItems(category) {
     currentCategory = category;
