@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>あみぐるみ Image Maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Yeseva+One&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="favicon.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="favicon.png" />
+    <link rel="shortcut icon" href="favicon2.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
+    <meta name="apple-mobile-web-app-title" content="AmigurumiImageMaker" />
+    <link rel="manifest" href="favicon.png" />
+
+</head>
+<body>
+    <audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>
+
+    <!-- スタート画面 -->
+    <audio id="se-choice" src="choice.mp3" preload="auto"></audio>
+    <audio id="se-click" src="click.mp3" preload="auto"></audio>
+
+    <div id="start-screen">
+        <img src="topimage.png" alt="タイトル画像" style="width: 100%; max-width: 400px; display: block; margin: 30px auto;">
+        <div class="start-button">
+            <button class="start-btn" onclick="goToCharacterSelect()"><span class="start-text">START</span></button>
+        </div>
+
+    </div>
+
+    <!-- キャラ選択画面 -->
+    <div id="select-screen" style="display: none;">
+
+        <span class="celect-text">Character Celect</span>
+
+        <div class="character-choice">
+            <img src="images/Rbody_mw.webp" alt="R" onclick="selectCharacter('R')">
+            <img src="images/Cbody_mw.webp" alt="C" onclick="selectCharacter('C')">
+        </div>
+    </div>
+
+    <!-- 着せ替え画面 -->
+    <div id="game-screen" style="display: none;">
+        <button id="back-button" onclick="goBack()">← 戻る</button>
+        <button id="comple-button" onclick="goToCompletion()">完成！</button>
+
+        <div id="game-container">
+            <div id="character-area">
+            </div>
+
+            <div id="category-buttons">
+                <button class="category-button" onclick="showItems('body')">
+                    <img src="category_body.png" alt="ボディ" class="icon-img">
+                </button>
+                <button class="category-button" onclick="showItems('eyes')">
+                    <img src="category_eyes.png" alt="アイ" class="icon-img">
+                </button>
+                <button class="category-button" onclick="showItems('clothes')">
+                    <img src="category_clothes.png" alt="コスチューム" class="icon-img">
+                </button>
+                <button class="category-button" onclick="showItems('hair')">
+                    <img src="category_head.png" alt="アクセサリー" class="icon-img">
+                </button>
+
+                <button class="category-button" onclick="showItems('ac2')">
+                    <img src="category_head2.png" alt="アクセサリー2" class="icon-img">
+                </button>
+
+                <button class="category-button" onclick="showItems('ac3')">
+                    <img src="category_head3.png" alt="アクセサリー3" class="icon-img">
+
+            </button>
+</div>
+
+            <div id="item-list"></div>
+        </div>
+
+        <div id="save-load-buttons">
+            <button onclick="resetItems()">リセット</button>
+            <button onclick="openSaveLoad()">保存・読み込み</button>
+        </div>
+
+    </div>
+
+    <!-- 完成画面 -->
+    <div id="comple-screen" style="display: none;">
+        <div class="container_back" id="con_back">
+
+            <!-- 背面に表示されるフレーム -->
+            <div class="frame hidden" id="frameImage">
+                <img src="back_comple.webp" alt="Frame">
+            </div>
+
+            <div class="thankyou-text hidden" id="thankText">Thank you !</div>
+
+        </div>
+
+        <div class="container">
+
+            <!-- アニメーション順に表示される画像たち -->
+
+
+            <div class="anime-object hidden" id="bagClose">
+                <img src="bag_close.png" alt="Bag Close">
+            </div>
+            <div class="anime-object hidden" id="bagOpen">
+                <img src="bag_open.png" alt="Bag Open">
+            </div>
+        </div>
+
+
+
+        <div id="completion-container">
+            <!-- 完成画面用の表示領域 -->
+            <!--<div id="thank-you" class="pop-in">Thank You!</div>-->
+            <!--<button id ="goTo" onclick="goTop()">トップに戻る</button>-->
+            <!--<button id="linkBtn" onclick="https://hanitto8210.storeinfo.jp/">ハニットHP</button>-->
+        </div>
+    </div>
+
+
+        <!-- 保存・読み込み画面（初期は非表示） -->
+        <div id="save-load-screen" style="display: none;">
+            <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
+            <span class="save-text">Save</span>
+            <div id="slots-container"></div>
+        </div>
+
+
+        <div id="music-toggle-button">
+            <button id="toggle-music">♪ OFF</button>
+        </div>
+
+        <script src="script.js"></script>
+</body>
+</html>
