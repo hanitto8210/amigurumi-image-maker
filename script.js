@@ -53,37 +53,60 @@ function setupToggleButton() {
     });
 }
 
-// ===== 効果音の準備 =====
-const choiceSound = document.getElementById("se-choice");
-const clickSound = document.getElementById("se-click");
+// ===== Web Audio API の準備 =====
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+let clickBuffer = null;
+let choiceBuffer = null;
 
-// 明示的にロードしておく（スマホ対応）
-clickSound.load();
-choiceSound.load();
-
-// ===== ユーザーの初回操作で音声を有効化（スマホ用に touchstart も） =====
-function unlockAudio() {
-    // すべての音声に対して再生 → 停止 → 時間リセット（音は聞こえない）
-    [clickSound, choiceSound].forEach(sound => {
-        sound.play().catch(() => { });
-        sound.pause();
-        sound.currentTime = 0;
-    });
+// ===== 効果音を読み込んで buffer に保存（非同期） =====
+function loadSound(url) {
+    return fetch(url)
+        .then(res => res.arrayBuffer())
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer));
 }
 
-// 一度だけ初回操作で音声を「許可済み」にする
-document.addEventListener("click", unlockAudio, { once: true });
-document.addEventListener("touchstart", unlockAudio, { once: true });
+Promise.all([
+    loadSound("click.mp3"),
+    loadSound("choice.mp3")
+]).then(([clickData, choiceData]) => {
+    clickBuffer = clickData;
+    choiceBuffer = choiceData;
+});
 
-// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+// ===== 音を再生する関数 =====
+function playSound(buffer) {
+    if (!buffer) return;
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+}
+
+// ===== スマホで AudioContext を有効化 =====
+function unlockAudioContext() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}
+document.addEventListener("click", unlockAudioContext, { once: true });
+document.addEventListener("touchstart", unlockAudioContext, { once: true });
+
+// ===== スタートボタンを押したときの処理 =====
+function goToCharacterSelect() {
+    playSound(choiceBuffer);
+    // ページ遷移や処理があればここに書く
+}
+
+// ===== 他の全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
-    if (button.id !== "start-btn") {
+    if (!button.classList.contains("start-btn")) {
         button.addEventListener("click", () => {
-            clickSound.currentTime = 0;
-            clickSound.play();
+            playSound(clickBuffer);
         });
     }
 });
+
+
 
 
 let selectedCharacter = null;
@@ -295,15 +318,13 @@ const items = {
 let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3:null };
 let currentCategory = "eyes";
 
-// ボタンを取得
-const buttons = document.querySelectorAll('button');
 
 
-// ===== スタートボタンの処理 =====
-function goToCharacterSelect() {
-    // choice.mp3 を鳴らす
-    choiceSound.currentTime = 0;
-    choiceSound.play();
+//// ===== スタートボタンの処理 =====
+//function goToCharacterSelect() {
+//    // choice.mp3 を鳴らす
+//    choiceSound.currentTime = 0;
+//    choiceSound.play();
 
     // トップ画面（start-screen）を非表示にして、（select-screen）を表示
     // スクリーン切り替え
@@ -366,6 +387,15 @@ function selectCharacter(characterId) {
 //    showItems("body");
 //}
 
+// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+document.querySelectorAll("button").forEach(button => {
+    if (button.id !== "start-btn") {
+        button.addEventListener("click", () => {
+            clickSound.currentTime = 0;
+            clickSound.play();
+        });
+    }
+});
 
 function showItems(category) {
     currentCategory = category;
