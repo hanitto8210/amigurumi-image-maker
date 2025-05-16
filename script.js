@@ -384,26 +384,6 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
-//function selectCharacter(characterId) {
-//    selectedCharacter = characterId;
-
-//    console.log("選ばれたキャラ", characterId);
-
-//        document.getElementById("select-screen").style.display = "none";
-//        document.getElementById("game-screen").style.display = "block";
-
-//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
-
-//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
-//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
-//        selectedItems[part] = null;
-//        const partImg = document.getElementById(`character-${part}`);
-//        partImg.src = "";
-//        partImg.style.display = "none";
-//    }
-
-//    showItems("body");
-//}
 
 // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
@@ -713,8 +693,11 @@ compleButton.onclick = () => {
     setTimeout(() => {
         const backBtn = document.createElement("button");
         backBtn.textContent = "トップ画面へ";
-        backBtn.className = "back-to-top"; // ← ここでCSSのクラス名だけ指定
+        backBtn.className = "back-to-top";
+
         backBtn.onclick = () => {
+            stopBGM(); // ← まずBGMを止める
+
             compleScreen.style.display = "none";
             document.getElementById("start-screen").style.display = "block";
         };
