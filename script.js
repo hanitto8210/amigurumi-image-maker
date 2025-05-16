@@ -3,7 +3,7 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
 
 function loadSound(name, url) {
-    fetch(url)
+    return fetch(url)
         .then(response => response.arrayBuffer())
         .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
         .then(audioBuffer => {
@@ -56,7 +56,7 @@ document.getElementById("start-btn").addEventListener("click", goToCharacterSele
 // ===== 起動時に音を読み込む =====
 Promise.all([
     loadSound("choice", "choice.mp3"),
-    loadSound("click", "click.mp3"),
+    loadSound("click", "click.ogg"),
     loadSound("bgm", "loop_maou_bgm.mp3"),
 ]).then(() => {
     console.log("すべての音声ファイルが読み込まれました！");
@@ -93,14 +93,14 @@ function setupMusicControls() {
     setupToggleButton();   // ON/OFF切り替えボタン
 }
 
-// 最初のユーザー操作でAudioContextをresumeして再生可能にする
-function setupFirstClick() {
-    document.body.addEventListener("click", () => {
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-        }
-    }, { once: true });
-}
+//// 最初のユーザー操作でAudioContextをresumeして再生可能にする
+//function setupFirstClick() {
+//    document.body.addEventListener("click", () => {
+//        if (audioContext.state === "suspended") {
+//            audioContext.resume();
+//        }
+//    }, { once: true });
+//}
 
 // ボタンによるON/OFF切り替え処理
 function setupToggleButton() {
