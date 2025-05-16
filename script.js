@@ -22,9 +22,6 @@ function playSound(name) {
     source.start(0);
 }
 
-loadSound("choice", "choice.mp3");
-loadSound("click", "click.mp3");
-loadSound("bgm", "loop_maou_bgm.mp3");
 
 
 //// 最初のクリックでBGM再生する関数
@@ -256,18 +253,24 @@ let bgmSource = null;
 
 // ===== スタートボタンの処理 =====
 
-
-function goToCharacterSelect() {
-    // 効果音 choice.mp3 を鳴らす
+document.getElementById("start-btn").addEventListener("click", () => {
     playSound("choice");
-
-    // BGM を再生する（事前に読み込まれている前提）
     playBGM();
 
-    // トップ画面を非表示、キャラ選択画面を表示
     document.getElementById("start-screen").style.display = "none";
     document.getElementById("select-screen").style.display = "block";
-}
+});
+
+// ===== 起動時に音を読み込む =====
+Promise.all([
+    loadSound("choice", "audio/choice.mp3"),
+    loadSound("click", "audio/click.mp3"),
+    loadSound("bgm", "audio/loop_maou_bgm.mp3"),
+]).then(() => {
+    console.log("すべての音声ファイルが読み込まれました！");
+});
+
+
 
 // BGMを再生する関数（再生前に読み込み確認）
 function playBGM() {
