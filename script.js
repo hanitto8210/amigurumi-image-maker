@@ -1,137 +1,314 @@
-スマホで表示するゲームの音の重複や連打時の遅延を減らせたいので、
-同じ音声ファイルを複数の <audio> 要素に分けて使う方法で、下記のコードを書き直していただきたいです。
 
-【html】
-<body>
-    <audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>
+// ==============================
+// 初期設定
+// ==============================
 
-    <!-- スタート画面 -->
-    <audio id="se-choice" src="choice.mp3" preload="auto"></audio>
-    <audio id="se-click" src="click.mp3" preload="auto"></audio>
+// BGMの要素とボタンの要素を取得
+const bgm = document.getElementById("bgm");
+const toggleBtn = document.getElementById("toggle-music"); // ボタンのIDを修正
+const startScreen = document.getElementById("start-screen"); // start-screenを取得
 
-    <div id="start-screen">
-        <img src="topimage.png" alt="タイトル画像" style="width: 100%; max-width: 400px; display: block; margin: 30px auto;">
-        <div class="start-button">
-            <button class="start-btn" onclick="goToCharacterSelect()"><span class="start-text">START</span></button>
-        </div>
+// ページがロードされたら初期化する
+window.addEventListener("DOMContentLoaded", () => {
+    setupBGM();           // BGMの初期設定
+    setupFirstClick();     // 最初のクリックで音楽再生
+    setupToggleButton();   // 音楽ON/OFFボタンの設定
+});
 
-    </div>
+// ==============================
+// BGMを準備する関数
+// ==============================
+function setupBGM() {
+    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
+    bgm.pause();         // 初期状態で音楽を停止
+    toggleBtn.style.display = "block"; // ボタンを表示
+    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
+}
 
-    <!-- キャラ選択画面 -->
-    <div id="select-screen" style="display: none;">
+// ==============================
+// 最初のクリックでBGM再生する関数
+// ==============================
+function setupFirstClick() {
+    // 最初のクリックで音楽を再生する
+    document.body.addEventListener("click", () => {
+        bgm.play();  // 音楽を再生
+        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
+    }, { once: true }); // 1回だけ反応する
+}
 
-        <span class="celect-text">Character Celect</span>
+// ==============================
+// 音楽ON/OFFボタンを設定する関数
+// ==============================
+function setupToggleButton() {
+    if (!toggleBtn) return; // ボタンがなかったら何もしない
 
-        <div class="character-choice">
-            <img src="images/Rbody_mw.webp" alt="R" onclick="selectCharacter('R')">
-            <img src="images/Cbody_mw.webp" alt="C" onclick="selectCharacter('C')">
-        </div>
-    </div>
-
-    <!-- 着せ替え画面 -->
-    <div id="game-screen" style="display: none;">
-        <button id="back-button" onclick="goBack()">← 戻る</button>
-        <button id="comple-button" onclick="goToCompletion()">完成！</button>
-
-        <div id="game-container">
-            <div id="character-area">
-            </div>
-
-            <div id="category-buttons">
-                <button class="category-button" onclick="showItems('body')">
-                    <img src="category_body.png" alt="ボディ" class="icon-img">
-                </button>
-                <button class="category-button" onclick="showItems('eyes')">
-                    <img src="category_eyes.png" alt="アイ" class="icon-img">
-                </button>
-                <button class="category-button" onclick="showItems('clothes')">
-                    <img src="category_clothes.png" alt="コスチューム" class="icon-img">
-                </button>
-                <button class="category-button" onclick="showItems('hair')">
-                    <img src="category_head.png" alt="アクセサリー" class="icon-img">
-                </button>
-
-                <button class="category-button" onclick="showItems('ac2')">
-                    <img src="category_head2.png" alt="アクセサリー2" class="icon-img">
-                </button>
-
-                <button class="category-button" onclick="showItems('ac3')">
-                    <img src="category_head3.png" alt="アクセサリー3" class="icon-img">
-
-            </button>
-</div>
-
-            <div id="item-list"></div>
-        </div>
-
-        <div id="save-load-buttons">
-            <button onclick="resetItems()">リセット</button>
-            <button onclick="openSaveLoad()">保存・読み込み</button>
-        </div>
-
-    </div>
-
-    <!-- 完成画面 -->
-    <div id="comple-screen" style="display: none;">
-        <div class="container_back" id="con_back">
-
-            <!-- 背面に表示されるフレーム -->
-            <div class="frame hidden" id="frameImage">
-                <img src="back_comple.webp" alt="Frame">
-            </div>
-
-            <div class="thankyou-text hidden" id="thankText">Thank you !</div>
-
-        </div>
-
-        <div class="container">
-
-            <!-- アニメーション順に表示される画像たち -->
-
-
-            <div class="anime-object hidden" id="bagClose">
-                <img src="bag_close.png" alt="Bag Close">
-            </div>
-            <div class="anime-object hidden" id="bagOpen">
-                <img src="bag_open.png" alt="Bag Open">
-            </div>
-        </div>
+    toggleBtn.addEventListener("click", () => {
+        if (bgm.paused) {
+            bgm.play(); // 音楽を再生
+            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
+        } else {
+            bgm.pause(); // 音楽を停止
+            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
+        }
+    });
+}
 
 
 
-        <div id="completion-container">
-           
-        </div>
-    </div>
+let selectedCharacter = null;
 
 
-        <!-- 保存・読み込み画面（初期は非表示） -->
-        <div id="save-load-screen" style="display: none;">
-            <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
-            <span class="save-text">Save</span>
-            <div id="slots-container"></div>
-        </div>
+const items = {
+    R: {
+        body: [
+/*            { name: "ボディ-MW", src: "images/Rbody_mw.webp" }, *//*デフォルトなので選択肢から除外*/
+            { name: "ボディ-SW", src: "images/Rbody_sw.webp" },
+            { name: "ボディ-G", src: "images/Rbody_g.webp" },
+            { name: "ボディ-B", src: "images/Rbody_b.webp" },
+            { name: "ボディ-CY", src: "images/Rbody_cy.webp" },
+            { name: "ボディ-LBR", src: "images/Rbody_lbr.webp" },
+            { name: "ボディ-N", src: "images/Rbody_n.webp" },
+            { name: "ボディ-P", src: "images/Rbody_p.webp" },
+            { name: "ボディ-PUR", src: "images/Rbody_pur.webp" },
+            { name: "ボディ-WI", src: "images/Rbody_wi.webp" }
+        ],
+        eyes: [
+            { name: "eyes_b", src: "images/eyes_b.webp", icon: "images/icons/eyes_b_icon.webp" },
+            { name: "eyes_dbl", src: "images/eyes_dbl.webp", icon: "images/icons/eyes_dbl_icon.webp" },
+            { name: "eyes_ibl", src: "images/eyes_ibl.webp", icon: "images/icons/eyes_ibl_icon.webp" },
+            { name: "eyes_lbl", src: "images/eyes_lbl.webp", icon: "images/icons/eyes_lbl_icon.webp" },
+            { name: "eyes_p", src: "images/eyes_p.webp", icon: "images/icons/eyes_p_icon.webp" },
+            { name: "eyes_pur", src: "images/eyes_pur.webp", icon: "images/icons/eyes_pur_icon.webp" },
+            { name: "eyes_y", src: "images/eyes_y.webp", icon: "images/icons/eyes_y_icon.webp" },
+            { name: "eyes_ygr", src: "images/eyes_ygr.webp", icon: "images/icons/eyes_ygr_icon.webp" },
+            { name: "eyes_y_dbl", src: "images/eyes_y_dbl.webp", icon: "images/icons/eyes_y_dbl_icon.webp" },
+            { name: "eyes_y_lbl", src: "images/eyes_y_lbl.webp", icon: "images/icons/eyes_y_lbl_icon.webp" },
+            { name: "eyes_y_p", src: "images/eyes_y_p.webp", icon: "images/icons/eyes_y_p_icon.webp" },
+            { name: "eyes_y_ygr", src: "images/eyes_y_ygr.webp", icon: "images/icons/eyes_y_ygr_icon.webp" },
+            { name: "eyes_y_b", src: "images/eyes_y_b.webp", icon: "images/icons/eyes_y_b_icon.webp" },
+            { name: "eyes_y_pur", src: "images/eyes_y_pur.webp", icon: "images/icons/eyes_y_pur_icon.webp" },
+            { name: "eyes_b_X", src: "images/eyes_b_X.webp", icon: "images/icons/eyes_b_X_icon.webp" }
+        ],
+        clothes: [
+            { name: "cos_ribbon_b", src: "images/cos_ribbon_b.webp", icon: "images/icons/cos_ribbon_b_icon.webp" },
+            { name: "cos_ribbon_bl", src: "images/cos_ribbon_bl.webp", icon: "images/icons/cos_ribbon_bl_icon.webp" },
+            { name: "cos_ribbon_pur", src: "images/cos_ribbon_pur.webp", icon: "images/icons/cos_ribbon_pur_icon.webp" },
+            { name: "cos_ribbon_w", src: "images/cos_ribbon_w.webp", icon: "images/icons/cos_ribbon_w_icon.webp" },
+            { name: "cos_heart", src: "images/cos_heart.webp", icon: "images/icons/cos_heart_icon.webp" },
+            { name: "cos_cothic_b", src: "images/cos_cothic_b.webp", icon: "images/icons/cos_cothic_b_icon.webp" },
+            { name: "cos_cothic_w", src: "images/cos_cothic_w.webp", icon: "images/icons/cos_cothic_w_icon.webp" },
+
+        ],
+        hair: [
+            { name: "Rheart", src: "images/Rheart.webp", icon: "images/icons/heart_icon.webp" },
+            { name: "Rleft_rings", src: "images/Rleft_rings.webp", icon: "images/icons/left_rings_icon.webp" },
+            { name: "Rusaribbon_abl", src: "images/Rusaribbon_abl.webp", icon: "images/icons/Rusaribbon_abl_icon.webp" },
+            { name: "Rusaribbon_b", src: "images/Rusaribbon_b.webp", icon: "images/icons/Rusaribbon_b_icon.webp" },
+            { name: "Rusaribbon_br", src: "images/Rusaribbon_br.webp", icon: "images/icons/Rusaribbon_br_icon.webp" },
+            { name: "Rusaribbon_ibl", src: "images/Rusaribbon_ibl.webp", icon: "images/icons/Rusaribbon_ibl_icon.webp" },
+            { name: "Rusaribbon_lpur", src: "images/Rusaribbon_lpur.webp", icon: "images/icons/Rusaribbon_lpur_icon.webp" },
+            { name: "Rusaribbon_mbr", src: "images/Rusaribbon_mbr.webp", icon: "images/icons/Rusaribbon_mbr_icon.webp" },
+            { name: "Rusaribbon_mw", src: "images/Rusaribbon_mw.webp", icon: "images/icons/Rusaribbon_mw_icon.webp" },
+            { name: "Rusaribbon_n", src: "images/Rusaribbon_n.webp", icon: "images/icons/Rusaribbon_n_icon.webp" },
+            { name: "Rusaribbon_rp", src: "images/Rusaribbon_rp.webp", icon: "images/icons/Rusaribbon_rp_icon.webp" },
+            { name: "Rusaribbon_rr", src: "images/Rusaribbon_rr.webp", icon: "images/icons/Rusaribbon_rr_icon.webp" },
+            { name: "Rusaribbon_sw", src: "images/Rusaribbon_sw.webp", icon: "images/icons/Rusaribbon_sw_icon.webp" },
+
+        ],
 
 
-        <div id="music-toggle-button">
-            <button id="toggle-music">♪ OFF</button>
-        </div>
+        ac2: [
+            { name: "Rmofu", src: "images/Rmofu.webp", icon: "images/icons/mofu_icon.webp" },
+            { name: "Rflowre_b_y", src: "images/Rflowre_b_y.webp", icon: "images/icons/Rflowre_b_y_icon.webp" },
+            { name: "Rflowre_r_p", src: "images/Rflowre_r_p.webp", icon: "images/icons/Rflowre_r_p_icon.webp" },
+            { name: "Rflowre_y_r", src: "images/Rflowre_y_r.webp", icon: "images/icons/Rflowre_y_r_icon.webp" },
+            
+        ],
 
-        <script src="script.js"></script>
-</body>
-【js】
+        ac3: [
+            { name: "big_center_b", src: "images/big_center_b.webp", icon: "images/icons/big_center_b_icon.webp" },
+            { name: "big_center_r", src: "images/big_center_r.webp", icon: "images/icons/big_center_r_icon.webp" },
+            { name: "big_center_w", src: "images/big_center_w.webp", icon: "images/icons/big_center_w_icon.webp" },
+            { name: "Rbig_side_w", src: "images/Rbig_side_w.webp", icon: "images/icons/big_side_w_icon.webp" },
+            { name: "Rbig_side_r", src: "images/Rbig_side_r.webp", icon: "images/icons/big_side_r_icon.webp" },
+            { name: "Rbig_side_b", src: "images/Rbig_side_b.webp", icon: "images/icons/big_side_b_icon.webp" },
+            { name: "Rsmall_side_abl", src: "images/Rsmall_side_abl.webp", icon: "images/icons/small_side_abl_icon.webp" },
+            { name: "Rsmall_side_b", src: "images/Rsmall_side_b.webp", icon: "images/icons/small_side_b_icon.webp" },
+            { name: "Rsmall_side_br", src: "images/Rsmall_side_br.webp", icon: "images/icons/small_side_br_icon.webp" },
+            { name: "Rsmall_side_ibl", src: "images/Rsmall_side_ibl.webp", icon: "images/icons/small_side_ibl_icon.webp" },
+            { name: "Rsmall_side_lpur", src: "images/Rsmall_side_lpur.webp", icon: "images/icons/small_side_lpur_icon.webp" },
+            { name: "Rsmall_side_mbr", src: "images/Rsmall_side_mbr.webp", icon: "images/icons/small_side_mbr_icon.webp" },
+            { name: "Rsmall_side_mw", src: "images/Rsmall_side_mw.webp", icon: "images/icons/small_side_mw_icon.webp" },
+            { name: "Rsmall_side_n", src: "images/Rsmall_side_n.webp", icon: "images/icons/small_side_n_icon.webp" },
+            { name: "Rsmall_side_rp", src: "images/Rsmall_side_rp.webp", icon: "images/icons/small_side_rp_icon.webp" },
+            { name: "Rsmall_side_rr", src: "images/Rsmall_side_rr.webp", icon: "images/icons/small_side_rr_icon.webp" },
+            { name: "Rsmall_side_sw", src: "images/Rsmall_side_sw.webp", icon: "images/icons/small_side_sw_icon.webp" },
+            { name: "small_center_abl", src: "images/small_center_abl.webp", icon: "images/icons/small_center_abl_icon.webp" },
+            { name: "small_center_b", src: "images/small_center_b.webp", icon: "images/icons/small_center_b_icon.webp" },
+            { name: "small_center_br", src: "images/small_center_br.webp", icon: "images/icons/small_center_br_icon.webp" },
+            { name: "small_center_ibl", src: "images/small_center_ibl.webp", icon: "images/icons/small_center_ibl_icon.webp" },
+            { name: "small_center_lpur", src: "images/small_center_lpur.webp", icon: "images/icons/small_center_lpur_icon.webp" },
+            { name: "small_center_mbr", src: "images/small_center_mbr.webp", icon: "images/icons/small_center_mbr_icon.webp" },
+            { name: "small_center_mw", src: "images/small_center_mw.webp", icon: "images/icons/small_center_mw_icon.webp" },
+            { name: "small_center_n", src: "images/small_center_n.webp", icon: "images/icons/small_center_n_icon.webp" },
+            { name: "small_center_rp", src: "images/small_center_rp.webp", icon: "images/icons/small_center_rp_icon.webp" },
+            { name: "small_center_rr", src: "images/small_center_rr.webp", icon: "images/icons/small_center_rr_icon.webp" },
+            { name: "small_center_sw", src: "images/small_center_sw.webp", icon: "images/icons/small_center_sw_icon.webp" },
+        ]
+
+    },
+
+    C: {
+        body: [
+            { name: "ボディ-SW", src: "images/Cbody_sw.webp" },
+            { name: "ボディ-G", src: "images/Cbody_g.webp" },
+            { name: "ボディ-B", src: "images/Cbody_b.webp" },
+            { name: "ボディ-CY", src: "images/Cbody_cy.webp" },
+            { name: "ボディ-LBR", src: "images/Cbody_lbr.webp" },
+            { name: "ボディ-N", src: "images/Cbody_n.webp" },
+            { name: "ボディ-P", src: "images/Cbody_p.webp" },
+            { name: "ボディ-PUR", src: "images/Cbody_pur.webp" },
+            { name: "ボディ-WI", src: "images/Cbody_wi.webp" }
+        ],
+        eyes: [
+            { name: "eyes_b", src: "images/eyes_b.webp", icon: "images/icons/eyes_b_icon.webp" },
+            { name: "eyes_dbl", src: "images/eyes_dbl.webp", icon: "images/icons/eyes_dbl_icon.webp" },
+            { name: "eyes_ibl", src: "images/eyes_ibl.webp", icon: "images/icons/eyes_ibl_icon.webp" },
+            { name: "eyes_lbl", src: "images/eyes_lbl.webp", icon: "images/icons/eyes_lbl_icon.webp" },
+            { name: "eyes_p", src: "images/eyes_p.webp", icon: "images/icons/eyes_p_icon.webp" },
+            { name: "eyes_pur", src: "images/eyes_pur.webp", icon: "images/icons/eyes_pur_icon.webp" },
+            { name: "eyes_y", src: "images/eyes_y.webp", icon: "images/icons/eyes_y_icon.webp" },
+            { name: "eyes_ygr", src: "images/eyes_ygr.webp", icon: "images/icons/eyes_ygr_icon.webp" },
+            { name: "eyes_y_dbl", src: "images/eyes_y_dbl.webp", icon: "images/icons/eyes_y_dbl_icon.webp" },
+            { name: "eyes_y_lbl", src: "images/eyes_y_lbl.webp", icon: "images/icons/eyes_y_lbl_icon.webp" },
+            { name: "eyes_y_p", src: "images/eyes_y_p.webp", icon: "images/icons/eyes_y_p_icon.webp" },
+            { name: "eyes_y_ygr", src: "images/eyes_y_ygr.webp", icon: "images/icons/eyes_y_ygr_icon.webp" },
+            { name: "eyes_y_b", src: "images/eyes_y_b.webp", icon: "images/icons/eyes_y_b_icon.webp" },
+            { name: "eyes_y_pur", src: "images/eyes_y_pur.webp", icon: "images/icons/eyes_y_pur_icon.webp" },
+            { name: "eyes_b_X", src: "images/eyes_b_X.webp", icon: "images/icons/eyes_b_X_icon.webp" }
+        ],
+        clothes: [
+            { name: "cos_ribbon_b", src: "images/cos_ribbon_b.webp", icon: "images/icons/cos_ribbon_b_icon.webp" },
+            { name: "cos_ribbon_bl", src: "images/cos_ribbon_bl.webp", icon: "images/icons/cos_ribbon_bl_icon.webp" },
+            { name: "cos_ribbon_pur", src: "images/cos_ribbon_pur.webp", icon: "images/icons/cos_ribbon_pur_icon.webp" },
+            { name: "cos_ribbon_w", src: "images/cos_ribbon_w.webp", icon: "images/icons/cos_ribbon_w_icon.webp" },
+            { name: "cos_heart", src: "images/cos_heart.webp", icon: "images/icons/cos_heart_icon.webp" },
+            { name: "cos_cothic_b", src: "images/cos_cothic_b.webp", icon: "images/icons/cos_cothic_b_icon.webp" },
+            { name: "cos_cothic_w", src: "images/cos_cothic_w.webp", icon: "images/icons/cos_cothic_w_icon.webp" },
+        ],
+
+        hair: [
+            { name: "Cpearl", src: "images/Cpearl.webp", icon: "images/icons/Cpearl_icon.webp" },
+
+            { name: "Cheart", src: "images/Cheart.webp", icon: "images/icons/heart_icon.webp" },
+            { name: "Cleft_rings", src: "images/Cleft_rings.webp", icon: "images/icons/left_rings_icon.webp" },
+            { name: "Cbijou_bl", src: "images/Cbijou_bl.webp", icon: "images/icons/Cbijou_bl_icon.webp" },
+            { name: "Cbijou_gr", src: "images/Cbijou_gr.webp", icon: "images/icons/Cbijou_gr_icon.webp" },
+            { name: "Cbijou_lbl", src: "images/Cbijou_lbl.webp", icon: "images/icons/Cbijou_lbl_icon.webp" },
+            { name: "Cbijou_p", src: "images/Cbijou_p.webp", icon: "images/icons/Cbijou_p_icon.webp" },
+            { name: "Cbijou_pur", src: "images/Cbijou_pur.webp", icon: "images/icons/Cbijou_pur_icon.webp" },
+            { name: "Cbijou_r", src: "images/Cbijou_r.webp", icon: "images/icons/Cbijou_r_icon.webp" },
+            { name: "Cbijou_y", src: "images/Cbijou_y.webp", icon: "images/icons/Cbijou_y_icon.webp" },
+            { name: "Cbijou_ygr", src: "images/Cbijou_ygr.webp", icon: "images/icons/Cbijou_ygr_icon.webp" },
+        ],
+
+        ac2: [
+            { name: "Cmofu", src: "images/Cmofu.webp", icon: "images/icons/mofu_icon.webp" },
+            { name: "Cstone_bl", src: "images/Cstone_bl.webp", icon: "images/icons/Cstone_bl_icon.webp" },
+            { name: "Cstone_gr", src: "images/Cstone_gr.webp", icon: "images/icons/Cstone_gr_icon.webp" },
+            { name: "Cstone_lbl", src: "images/Cstone_lbl.webp", icon: "images/icons/Cstone_lbl_icon.webp" },
+            { name: "Cstone_p", src: "images/Cstone_p.webp", icon: "images/icons/Cstone_p_icon.webp" },
+            { name: "Cstone_pur", src: "images/Cstone_pur.webp", icon: "images/icons/Cstone_pur_icon.webp" },
+            { name: "Cstone_r", src: "images/Cstone_r.webp", icon: "images/icons/Cstone_r_icon.webp" },
+            { name: "Cstone_y", src: "images/Cstone_y.webp", icon: "images/icons/Cstone_y_icon.webp" },
+            { name: "Cstone_ygr", src: "images/Cstone_ygr.webp", icon: "images/icons/Cstone_ygr_icon.webp" },
+        ],
+
+
+        ac3: [
+            { name: "Cbig_side_w", src: "images/Cbig_side_w.webp", icon: "images/icons/big_side_w_icon.webp" },
+            { name: "Cbig_side_r", src: "images/Cbig_side_r.webp", icon: "images/icons/big_side_r_icon.webp" },
+            { name: "Cbig_side_b", src: "images/Cbig_side_b.webp", icon: "images/icons/big_side_b_icon.webp" },
+
+            { name: "big_center_w", src: "images/big_center_w.webp", icon: "images/icons/big_center_w_icon.webp" },
+            { name: "big_center_r", src: "images/big_center_r.webp", icon: "images/icons/big_center_r_icon.webp" },
+            { name: "big_center_b", src: "images/big_center_b.webp", icon: "images/icons/big_center_b_icon.webp" },
+
+            { name: "small_center_abl", src: "images/small_center_abl.webp", icon: "images/icons/small_center_abl_icon.webp" },
+            { name: "small_center_b", src: "images/small_center_b.webp", icon: "images/icons/small_center_b_icon.webp" },
+            { name: "small_center_br", src: "images/small_center_br.webp", icon: "images/icons/small_center_br_icon.webp" },
+            { name: "small_center_ibl", src: "images/small_center_ibl.webp", icon: "images/icons/small_center_ibl_icon.webp" },
+            { name: "small_center_lpur", src: "images/small_center_lpur.webp", icon: "images/icons/small_center_lpur_icon.webp" },
+            { name: "small_center_mbr", src: "images/small_center_mbr.webp", icon: "images/icons/small_center_mbr_icon.webp" },
+            { name: "small_center_mw", src: "images/small_center_mw.webp", icon: "images/icons/small_center_mw_icon.webp" },
+            { name: "small_center_n", src: "images/small_center_n.webp", icon: "images/icons/small_center_n_icon.webp" },
+            { name: "small_center_rp", src: "images/small_center_rp.webp", icon: "images/icons/small_center_rp_icon.webp" },
+            { name: "small_center_rr", src: "images/small_center_rr.webp", icon: "images/icons/small_center_rr_icon.webp" },
+            { name: "small_center_sw", src: "images/small_center_sw.webp", icon: "images/icons/small_center_sw_icon.webp" },
+
+            { name: "Csmall_side_abl", src: "images/Csmall_side_abl.webp", icon: "images/icons/small_side_abl_icon.webp" },
+            { name: "Csmall_side_b", src: "images/Csmall_side_b.webp", icon: "images/icons/small_side_b_icon.webp" },
+            { name: "Csmall_side_br", src: "images/Csmall_side_br.webp", icon: "images/icons/small_side_br_icon.webp" },
+            { name: "Csmall_side_ibl", src: "images/Csmall_side_ibl.webp", icon: "images/icons/small_side_ibl_icon.webp" },
+            { name: "Csmall_side_lpur", src: "images/Csmall_side_lpur.webp", icon: "images/icons/small_side_lpur_icon.webp" },
+            { name: "Csmall_side_mbr", src: "images/Csmall_side_mbr.webp", icon: "images/icons/small_side_mbr_icon.webp" },
+            { name: "Csmall_side_mw", src: "images/Csmall_side_mw.webp", icon: "images/icons/small_side_mw_icon.webp" },
+            { name: "Csmall_side_n", src: "images/Csmall_side_n.webp", icon: "images/icons/small_side_n_icon.webp" },
+            { name: "Csmall_side_rp", src: "images/Csmall_side_rp.webp", icon: "images/icons/small_side_rp_icon.webp" },
+            { name: "Csmall_side_rr", src: "images/Csmall_side_rr.webp", icon: "images/icons/small_side_rr_icon.webp" },
+            { name: "Csmall_side_sw", src: "images/Csmall_side_sw.webp", icon: "images/icons/small_side_sw_icon.webp" },
+        ]
+    }
+};
+
+let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3:null };
+let currentCategory = "eyes";
+
 // ボタンを取得
 const buttons = document.querySelectorAll('button');
 
 // ===== 効果音の準備 =====
-const choiceSound = document.getElementById("se-choice");
-const clickSound = document.getElementById("se-click");
+//const choiceSound = document.getElementById("se-choice");
+//const clickSound = document.getElementById("se-click");
+
+// 複数の音を配列で用意（3つずつ）
+const choiceSounds = [
+    document.getElementById("se-choice1"),
+    document.getElementById("se-choice2"),
+    document.getElementById("se-choice3")
+];
+const clickSounds = [
+    document.getElementById("se-click1"),
+    document.getElementById("se-click2"),
+    document.getElementById("se-click3")
+];
+
+let choiceIndex = 0;
+let clickIndex = 0;
+
+// 効果音再生用の関数
+function playChoiceSound() {
+    const sound = choiceSounds[choiceIndex];
+    sound.currentTime = 0;
+    sound.play().catch(() => { });
+    choiceIndex = (choiceIndex + 1) % choiceSounds.length;
+}
+function playClickSound() {
+    const sound = clickSounds[clickIndex];
+    sound.currentTime = 0;
+    sound.play().catch(() => { });
+    clickIndex = (clickIndex + 1) % clickSounds.length;
+}
 
 // ===== スタートボタンの処理 =====
+//function goToCharacterSelect() {
+//    // choice.mp3 を鳴らす
+//    choiceSound.currentTime = 0;
+//    choiceSound.play();
+
 function goToCharacterSelect() {
-    // choice.mp3 を鳴らす
-    choiceSound.currentTime = 0;
-    choiceSound.play();
+    playChoiceSound();
+/*}*/
 
     // トップ画面（start-screen）を非表示にして、（select-screen）を表示
     // スクリーン切り替え
@@ -173,12 +350,34 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
+//function selectCharacter(characterId) {
+//    selectedCharacter = characterId;
+
+//    console.log("選ばれたキャラ", characterId);
+
+//        document.getElementById("select-screen").style.display = "none";
+//        document.getElementById("game-screen").style.display = "block";
+
+//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
+
+//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
+//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
+//        selectedItems[part] = null;
+//        const partImg = document.getElementById(`character-${part}`);
+//        partImg.src = "";
+//        partImg.style.display = "none";
+//    }
+
+//    showItems("body");
+//}
+
 // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
     if (button.id !== "start-btn") {
         button.addEventListener("click", () => {
-            clickSound.currentTime = 0;
-            clickSound.play();
+            playClickSound();
+        //    clickSound.currentTime = 0;
+        //    clickSound.play();
         });
     }
 });
@@ -433,3 +632,68 @@ compleButton.onclick = () => {
                 characterContainer.appendChild(partImg);
             }
         });
+
+
+    // ステップ0：frameを最初に表示
+    frame.classList.remove('hidden');
+    frame.classList.add('fadeIn');
+
+    // ステップ0.5：Thank you表示（zoomIn）
+    setTimeout(() => {
+        thankText.classList.remove('hidden');
+        thankText.classList.add('zoomIn_t');
+    }, 1200);
+
+    // ステップ1：bag_close 表示 → 消す
+    setTimeout(() => {
+        bagClose.classList.remove('hidden');
+        bagClose.classList.add('fadeIn1');
+    }, 2400);
+
+    setTimeout(() => {
+        bagClose.classList.remove('fadeIn');
+        bagClose.classList.add('zoomOut');
+    }, 4400);
+
+    // ステップ2：bag_open 表示 → 消す
+    setTimeout(() => {
+        bagClose.classList.add('hidden');
+        bagOpen.classList.remove('hidden');
+        bagOpen.classList.add('zoomIn');
+    }, 4700);
+
+    setTimeout(() => {
+        bagOpen.classList.remove('zoomIn');
+        bagOpen.classList.add('fadeOut');
+    }, 5800);
+
+    // ステップ3：icon_body 表示（アニメF）
+    setTimeout(() => {
+        bagOpen.classList.add('hidden');
+        characterContainer.classList.remove('hidden');
+        characterContainer.classList.add('fadeIn2');
+    }, 7600);
+
+    // 6. 画面下部に「トップ画面に戻る」ボタン表示
+    setTimeout(() => {
+        const backBtn = document.createElement("button");
+        backBtn.textContent = "トップ画面へ";
+        backBtn.className = "back-to-top"; // ← ここでCSSのクラス名だけ指定
+        backBtn.onclick = () => {
+            compleScreen.style.display = "none";
+            document.getElementById("start-screen").style.display = "block";
+        };
+        container.appendChild(backBtn);
+
+    // 6. 画面下部に「ハニットHP」ボタン表示
+    const linkBtn = document.createElement("button");
+    linkBtn.textContent = "ハニットHPへ"; // ← ボタンに表示する文字
+    linkBtn.className = "back-to-top";
+    linkBtn.style.marginTop = "380px"; // 「トップへ戻る」より下に見せるため余白を変更
+    linkBtn.onclick = () => {
+        window.open("https://hanitto8210.storeinfo.jp/", "_blank"); // ← 任意リンク（新しいタブで開く）
+    };
+    container.appendChild(linkBtn);
+}, 8000);
+
+};
