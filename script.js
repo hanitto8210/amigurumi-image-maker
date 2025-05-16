@@ -85,37 +85,16 @@ function playBGM() {
 
 
 
-const toggleBtn = document.getElementById("toggle-music");
 
-// 初期化処理（DOMContentLoadedなどで呼び出す）
-function setupMusicControls() {
-    setupFirstClick();     // 初回タップで再生許可
-    setupToggleButton();   // ON/OFF切り替えボタン
-}
-
-//// 最初のユーザー操作でAudioContextをresumeして再生可能にする
-//function setupFirstClick() {
-//    document.body.addEventListener("click", () => {
-//        if (audioContext.state === "suspended") {
-//            audioContext.resume();
-//        }
-//    }, { once: true });
+//// 初期化処理（DOMContentLoadedなどで呼び出す）
+//function setupMusicControls() {
+//    setupFirstClick();     // 初回タップで再生許可
+//    setupToggleButton();   // ON/OFF切り替えボタン
 //}
 
-// ボタンによるON/OFF切り替え処理
-function setupToggleButton() {
-    if (!toggleBtn) return;
 
-    toggleBtn.addEventListener("click", () => {
-        if (isMusicPlaying) {
-            stopBGM();
-            toggleBtn.textContent = "♪ ON";
-        } else {
-            playBGM();
-            toggleBtn.textContent = "♪ OFF";
-        }
-    });
-}
+
+
 
 // BGM停止関数
 function stopBGM() {
@@ -130,9 +109,29 @@ function stopBGM() {
 
 
 window.addEventListener("DOMContentLoaded", () => {
-    setupMusicControls();  // 追加したこの関数を呼ぶだけ！
+    const toggleBtn = document.getElementById("toggle-music");
+    setupMusicControls(toggleBtn);  // ← ボタンを引数で渡すように変更
 });
 
+function setupMusicControls(toggleBtn) {
+    //setupFirstClick();     // 初回タップで再生許可
+    setupToggleButton(toggleBtn); // ON/OFF切り替えボタン
+}
+
+// ボタンによるON/OFF切り替え処理
+function setupToggleButton(toggleBtn) {
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener("click", () => {
+        if (isMusicPlaying) {
+            stopBGM();
+            toggleBtn.textContent = "♪ ON";
+        } else {
+            playBGM();
+            toggleBtn.textContent = "♪ OFF";
+        }
+    });
+}
 
 let selectedCharacter = null;
 
