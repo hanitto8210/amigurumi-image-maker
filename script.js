@@ -1,8 +1,9 @@
 // Web Audio API を使ったサウンド管理
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
+
 const seFiles = {
-    click: "click.ogg", // ←ここは.mp3でも.wavでもOK
+    click: "click.wav", // ←ここは.mp3でも.wavでもOK
 };
 
 async function loadAllAudio() {
@@ -67,7 +68,7 @@ document.getElementById("start-btn").addEventListener("click", goToCharacterSele
 // ===== 起動時に音を読み込む =====
 Promise.all([
     loadSound("choice", "choice.mp3"),
-    loadSound("click", "click.ogg"),
+    loadSound("click", "click.wav"),
     loadSound("bgm", "loop_maou_bgm.mp3"),
 ]).then(() => {
     console.log("すべての音声ファイルが読み込まれました！");
