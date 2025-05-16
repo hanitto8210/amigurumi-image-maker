@@ -1,58 +1,3 @@
-
-//// ==============================
-//// 初期設定
-//// ==============================
-
-//// BGMの要素とボタンの要素を取得
-//const bgm = document.getElementById("bgm");
-//const toggleBtn = document.getElementById("toggle-music"); // ボタンのIDを修正
-//const startScreen = document.getElementById("start-screen"); // start-screenを取得
-
-//// ページがロードされたら初期化する
-//window.addEventListener("DOMContentLoaded", () => {
-//    setupBGM();           // BGMの初期設定
-//    setupFirstClick();     // 最初のクリックで音楽再生
-//    setupToggleButton();   // 音楽ON/OFFボタンの設定
-//});
-
-//// ==============================
-//// BGMを準備する関数
-//// ==============================
-//function setupBGM() {
-//    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
-//    bgm.pause();         // 初期状態で音楽を停止
-//    toggleBtn.style.display = "block"; // ボタンを表示
-//    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
-//}
-
-//// ==============================
-//// 最初のクリックでBGM再生する関数
-//// ==============================
-//function setupFirstClick() {
-//    // 最初のクリックで音楽を再生する
-//    document.body.addEventListener("click", () => {
-//        bgm.play();  // 音楽を再生
-//        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
-//    }, { once: true }); // 1回だけ反応する
-//}
-
-//// ==============================
-//// 音楽ON/OFFボタンを設定する関数
-//// ==============================
-//function setupToggleButton() {
-//    if (!toggleBtn) return; // ボタンがなかったら何もしない
-
-//    toggleBtn.addEventListener("click", () => {
-//        if (bgm.paused) {
-//            bgm.play(); // 音楽を再生
-//            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
-//        } else {
-//            bgm.pause(); // 音楽を停止
-//            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
-//        }
-//    });
-//}
-
 // Web Audio API を使ったサウンド管理
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
@@ -366,26 +311,6 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
-//function selectCharacter(characterId) {
-//    selectedCharacter = characterId;
-
-//    console.log("選ばれたキャラ", characterId);
-
-//        document.getElementById("select-screen").style.display = "none";
-//        document.getElementById("game-screen").style.display = "block";
-
-//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
-
-//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
-//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
-//        selectedItems[part] = null;
-//        const partImg = document.getElementById(`character-${part}`);
-//        partImg.src = "";
-//        partImg.style.display = "none";
-//    }
-
-//    showItems("body");
-//}
 
 // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
