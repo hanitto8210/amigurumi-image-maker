@@ -251,6 +251,9 @@ const buttons = document.querySelectorAll('button');
 const choiceSound = document.getElementById("se-choice");
 const clickSound = document.getElementById("se-click");
 
+let isMusicPlaying = false;
+let bgmSource = null;
+
 // ===== スタートボタンの処理 =====
 
 
@@ -268,23 +271,26 @@ function goToCharacterSelect() {
 
 // BGMを再生する関数（再生前に読み込み確認）
 function playBGM() {
+    if (isMusicPlaying) return; // ← すでに再生中なら何もしない
+
     const buffer = audioBuffers["bgm"];
     if (!buffer) {
-        // まだ読み込み中なら少し待って再試行
+        // 読み込みがまだなら少し待って再実行
         setTimeout(playBGM, 100);
         return;
     }
 
-    const source = audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(audioContext.destination);
-    source.start(0);
+    bgmSource = audioContext.createBufferSource();
+    bgmSource.buffer = buffer;
+    bgmSource.loop = true;
+    bgmSource.connect(audioContext.destination);
+    bgmSource.start(0);
+
+    isMusicPlaying = true; // 再生中フラグをON
 }
 
 
-let isMusicPlaying = false;
-let bgmSource = null;
+
 const toggleBtn = document.getElementById("toggle-music");
 
 // 初期化処理（DOMContentLoadedなどで呼び出す）
@@ -317,22 +323,22 @@ function setupToggleButton() {
     });
 }
 
-// BGM再生関数（ループあり）
-function playBGM() {
-    const buffer = audioBuffers["bgm"];
-    if (!buffer) {
-        setTimeout(playBGM, 100);
-        return;
-    }
+//// BGM再生関数（ループあり）
+//function playBGM() {
+//    const buffer = audioBuffers["bgm"];
+//    if (!buffer) {
+//        setTimeout(playBGM, 100);
+//        return;
+//    }
 
-    bgmSource = audioContext.createBufferSource();
-    bgmSource.buffer = buffer;
-    bgmSource.loop = true;
-    bgmSource.connect(audioContext.destination);
-    bgmSource.start(0);
+//    bgmSource = audioContext.createBufferSource();
+//    bgmSource.buffer = buffer;
+//    bgmSource.loop = true;
+//    bgmSource.connect(audioContext.destination);
+//    bgmSource.start(0);
 
-    isMusicPlaying = true;
-}
+//    isMusicPlaying = true;
+//}
 
 // BGM停止関数
 function stopBGM() {
@@ -695,8 +701,8 @@ compleButton.onclick = () => {
         backBtn.textContent = "トップ画面へ";
         backBtn.className = "back-to-top";
 
-        backBtn.onclick = () => {
-            stopBGM(); // ← まずBGMを止める
+        //backBtn.onclick = () => {
+        //    stopBGM(); // ← まずBGMを止める
 
             compleScreen.style.display = "none";
             document.getElementById("start-screen").style.display = "block";
