@@ -274,8 +274,8 @@ Promise.all([
 });
 
 //function goToCharacterSelect() {
-//    // 効果音 choice.mp3 を鳴らす
-//    //playSound("choice");
+//     効果音 choice.mp3 を鳴らす
+//    playSound("choice");
 
 //    // BGM を再生する（事前に読み込まれている前提）
 //    playBGM();
