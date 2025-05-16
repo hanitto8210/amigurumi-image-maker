@@ -30,6 +30,93 @@ document.addEventListener('click', () => {
     }
 }, { once: true });  // 最初の1回だけ
 
+// ボタンを取得
+const buttons = document.querySelectorAll('button');
+
+// ===== 効果音の準備 =====
+const choiceSound = document.getElementById("se-choice");
+const clickSound = document.getElementById("se-click");
+
+let isMusicPlaying = false;
+let bgmSource = null;
+
+// ===== スタートボタンの処理 =====
+
+function goToCharacterSelect() {
+    playSound("choice");
+    playBGM();
+
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("select-screen").style.display = "block";
+}
+
+document.getElementById("start-btn").addEventListener("click", goToCharacterSelect);
+
+
+// ===== 起動時に音を読み込む =====
+Promise.all([
+    loadSound("choice", "choice.mp3"),
+    loadSound("click", "click.mp3"),
+    loadSound("bgm", "loop_maou_bgm.mp3"),
+]).then(() => {
+    console.log("すべての音声ファイルが読み込まれました！");
+});
+
+
+// BGMを再生する関数（再生前に読み込み確認）
+function playBGM() {
+    if (isMusicPlaying) return; // ← すでに再生中なら何もしない
+
+    const buffer = audioBuffers["bgm"];
+    if (!buffer) {
+        // 読み込みがまだなら少し待って再実行
+        setTimeout(playBGM, 100);
+        return;
+    }
+
+    bgmSource = audioContext.createBufferSource();
+    bgmSource.buffer = buffer;
+    bgmSource.loop = true;
+    bgmSource.connect(audioContext.destination);
+    bgmSource.start(0);
+
+    isMusicPlaying = true; // 再生中フラグをON
+}
+
+
+
+const toggleBtn = document.getElementById("toggle-music");
+
+// 初期化処理（DOMContentLoadedなどで呼び出す）
+function setupMusicControls() {
+    setupFirstClick();     // 初回タップで再生許可
+    setupToggleButton();   // ON/OFF切り替えボタン
+}
+
+// 最初のユーザー操作でAudioContextをresumeして再生可能にする
+function setupFirstClick() {
+    document.body.addEventListener("click", () => {
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+    }, { once: true });
+}
+
+// ボタンによるON/OFF切り替え処理
+function setupToggleButton() {
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener("click", () => {
+        if (isMusicPlaying) {
+            stopBGM();
+            toggleBtn.textContent = "♪ ON";
+        } else {
+            playBGM();
+            toggleBtn.textContent = "♪ OFF";
+        }
+    });
+}
+
 
 let selectedCharacter = null;
 
@@ -240,92 +327,7 @@ const items = {
 let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3:null };
 let currentCategory = "eyes";
 
-// ボタンを取得
-const buttons = document.querySelectorAll('button');
 
-// ===== 効果音の準備 =====
-const choiceSound = document.getElementById("se-choice");
-const clickSound = document.getElementById("se-click");
-
-let isMusicPlaying = false;
-let bgmSource = null;
-
-// ===== スタートボタンの処理 =====
-
-function goToCharacterSelect() {
-    playSound("choice");
-    playBGM();
-
-    document.getElementById("start-screen").style.display = "none";
-    document.getElementById("select-screen").style.display = "block";
-}
-
-document.getElementById("start-btn").addEventListener("click", goToCharacterSelect);
-
-
-// ===== 起動時に音を読み込む =====
-Promise.all([
-    loadSound("choice", "audio/choice.mp3"),
-    loadSound("click", "audio/click.mp3"),
-    loadSound("bgm", "audio/loop_maou_bgm.mp3"),
-]).then(() => {
-    console.log("すべての音声ファイルが読み込まれました！");
-});
-
-
-// BGMを再生する関数（再生前に読み込み確認）
-function playBGM() {
-    if (isMusicPlaying) return; // ← すでに再生中なら何もしない
-
-    const buffer = audioBuffers["bgm"];
-    if (!buffer) {
-        // 読み込みがまだなら少し待って再実行
-        setTimeout(playBGM, 100);
-        return;
-    }
-
-    bgmSource = audioContext.createBufferSource();
-    bgmSource.buffer = buffer;
-    bgmSource.loop = true;
-    bgmSource.connect(audioContext.destination);
-    bgmSource.start(0);
-
-    isMusicPlaying = true; // 再生中フラグをON
-}
-
-
-
-const toggleBtn = document.getElementById("toggle-music");
-
-// 初期化処理（DOMContentLoadedなどで呼び出す）
-function setupMusicControls() {
-    setupFirstClick();     // 初回タップで再生許可
-    setupToggleButton();   // ON/OFF切り替えボタン
-}
-
-// 最初のユーザー操作でAudioContextをresumeして再生可能にする
-function setupFirstClick() {
-    document.body.addEventListener("click", () => {
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-        }
-    }, { once: true });
-}
-
-// ボタンによるON/OFF切り替え処理
-function setupToggleButton() {
-    if (!toggleBtn) return;
-
-    toggleBtn.addEventListener("click", () => {
-        if (isMusicPlaying) {
-            stopBGM();
-            toggleBtn.textContent = "♪ ON";
-        } else {
-            playBGM();
-            toggleBtn.textContent = "♪ OFF";
-        }
-    });
-}
 
 //// BGM再生関数（ループあり）
 //function playBGM() {
