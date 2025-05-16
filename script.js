@@ -117,6 +117,22 @@ function setupToggleButton() {
     });
 }
 
+// BGM停止関数
+function stopBGM() {
+    if (bgmSource) {
+        bgmSource.stop(0);
+        bgmSource.disconnect();
+        bgmSource = null;
+    }
+
+    isMusicPlaying = false;
+}
+
+
+window.addEventListener("DOMContentLoaded", () => {
+    setupMusicControls();  // 追加したこの関数を呼ぶだけ！
+});
+
 
 let selectedCharacter = null;
 
@@ -327,40 +343,6 @@ const items = {
 let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3:null };
 let currentCategory = "eyes";
 
-
-
-//// BGM再生関数（ループあり）
-//function playBGM() {
-//    const buffer = audioBuffers["bgm"];
-//    if (!buffer) {
-//        setTimeout(playBGM, 100);
-//        return;
-//    }
-
-//    bgmSource = audioContext.createBufferSource();
-//    bgmSource.buffer = buffer;
-//    bgmSource.loop = true;
-//    bgmSource.connect(audioContext.destination);
-//    bgmSource.start(0);
-
-//    isMusicPlaying = true;
-//}
-
-// BGM停止関数
-function stopBGM() {
-    if (bgmSource) {
-        bgmSource.stop(0);
-        bgmSource.disconnect();
-        bgmSource = null;
-    }
-
-    isMusicPlaying = false;
-}
-
-
-window.addEventListener("DOMContentLoaded", () => {
-    setupMusicControls();  // 追加したこの関数を呼ぶだけ！
-});
 
 
 // ===== キャラ選択時の処理 =====
