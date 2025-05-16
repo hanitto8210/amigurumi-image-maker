@@ -255,28 +255,33 @@ const clickSound = document.getElementById("se-click");
 
 
 function goToCharacterSelect() {
-    // choice.mp3 を鳴らす
+    // 効果音 choice.mp3 を鳴らす
     playSound("choice");
-    //choiceSound.currentTime = 0;
-    //choiceSound.play();
 
-    function playBGM() {
-        const buffer = audioBuffers["bgm"];
-        if (!buffer) return;
+    // BGM を再生する（事前に読み込まれている前提）
+    playBGM();
 
-        const source = audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-        source.connect(audioContext.destination);
-        source.start(0);
-    }
-
-    // トップ画面（start-screen）を非表示にして、（select-screen）を表示
-    // スクリーン切り替え
+    // トップ画面を非表示、キャラ選択画面を表示
     document.getElementById("start-screen").style.display = "none";
     document.getElementById("select-screen").style.display = "block";
-
 }
+
+// BGMを再生する関数（再生前に読み込み確認）
+function playBGM() {
+    const buffer = audioBuffers["bgm"];
+    if (!buffer) {
+        // まだ読み込み中なら少し待って再試行
+        setTimeout(playBGM, 100);
+        return;
+    }
+
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(audioContext.destination);
+    source.start(0);
+}
+
 
 // ===== キャラ選択時の処理 =====
 function selectCharacter(characterId) {
