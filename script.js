@@ -305,7 +305,7 @@ function playClickSound() {
 //    choiceSound.currentTime = 0;
 //    choiceSound.play();
 
-function goToCharacterSelect() {
+window.goToCharacterSelect = function () {
     playChoiceSound();
 /*}*/
 
