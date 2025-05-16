@@ -283,6 +283,74 @@ function playBGM() {
 }
 
 
+let isMusicPlaying = false;
+let bgmSource = null;
+const toggleBtn = document.getElementById("toggle-music");
+
+// 初期化処理（DOMContentLoadedなどで呼び出す）
+function setupMusicControls() {
+    setupFirstClick();     // 初回タップで再生許可
+    setupToggleButton();   // ON/OFF切り替えボタン
+}
+
+// 最初のユーザー操作でAudioContextをresumeして再生可能にする
+function setupFirstClick() {
+    document.body.addEventListener("click", () => {
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+    }, { once: true });
+}
+
+// ボタンによるON/OFF切り替え処理
+function setupToggleButton() {
+    if (!toggleBtn) return;
+
+    toggleBtn.addEventListener("click", () => {
+        if (isMusicPlaying) {
+            stopBGM();
+            toggleBtn.textContent = "♪ ON";
+        } else {
+            playBGM();
+            toggleBtn.textContent = "♪ OFF";
+        }
+    });
+}
+
+// BGM再生関数（ループあり）
+function playBGM() {
+    const buffer = audioBuffers["bgm"];
+    if (!buffer) {
+        setTimeout(playBGM, 100);
+        return;
+    }
+
+    bgmSource = audioContext.createBufferSource();
+    bgmSource.buffer = buffer;
+    bgmSource.loop = true;
+    bgmSource.connect(audioContext.destination);
+    bgmSource.start(0);
+
+    isMusicPlaying = true;
+}
+
+// BGM停止関数
+function stopBGM() {
+    if (bgmSource) {
+        bgmSource.stop(0);
+        bgmSource.disconnect();
+        bgmSource = null;
+    }
+
+    isMusicPlaying = false;
+}
+
+
+window.addEventListener("DOMContentLoaded", () => {
+    setupMusicControls();  // 追加したこの関数を呼ぶだけ！
+});
+
+
 // ===== キャラ選択時の処理 =====
 function selectCharacter(characterId) {
     selectedCharacter = characterId;
@@ -316,6 +384,26 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
+//function selectCharacter(characterId) {
+//    selectedCharacter = characterId;
+
+//    console.log("選ばれたキャラ", characterId);
+
+//        document.getElementById("select-screen").style.display = "none";
+//        document.getElementById("game-screen").style.display = "block";
+
+//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
+
+//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
+//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
+//        selectedItems[part] = null;
+//        const partImg = document.getElementById(`character-${part}`);
+//        partImg.src = "";
+//        partImg.style.display = "none";
+//    }
+
+//    showItems("body");
+//}
 
 // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 document.querySelectorAll("button").forEach(button => {
