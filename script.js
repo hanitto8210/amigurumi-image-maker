@@ -1,57 +1,93 @@
-// ==============================
-// 初期設定
-// ==============================
 
-// BGMの要素とボタンの要素を取得
-const bgm = document.getElementById("bgm");
-const toggleBtn = document.getElementById("toggle-music"); // ボタンのIDを修正
-const startScreen = document.getElementById("start-screen"); // start-screenを取得
+//// ==============================
+//// 初期設定
+//// ==============================
 
-// ページがロードされたら初期化する
-window.addEventListener("DOMContentLoaded", () => {
-    setupBGM();           // BGMの初期設定
-    setupFirstClick();     // 最初のクリックで音楽再生
-    setupToggleButton();   // 音楽ON/OFFボタンの設定
-});
+//// BGMの要素とボタンの要素を取得
+//const bgm = document.getElementById("bgm");
+//const toggleBtn = document.getElementById("toggle-music"); // ボタンのIDを修正
+//const startScreen = document.getElementById("start-screen"); // start-screenを取得
 
-// ==============================
-// BGMを準備する関数
-// ==============================
-function setupBGM() {
-    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
-    bgm.pause();         // 初期状態で音楽を停止
-    toggleBtn.style.display = "block"; // ボタンを表示
-    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
+//// ページがロードされたら初期化する
+//window.addEventListener("DOMContentLoaded", () => {
+//    setupBGM();           // BGMの初期設定
+//    setupFirstClick();     // 最初のクリックで音楽再生
+//    setupToggleButton();   // 音楽ON/OFFボタンの設定
+//});
+
+//// ==============================
+//// BGMを準備する関数
+//// ==============================
+//function setupBGM() {
+//    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
+//    bgm.pause();         // 初期状態で音楽を停止
+//    toggleBtn.style.display = "block"; // ボタンを表示
+//    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
+//}
+
+//// ==============================
+//// 最初のクリックでBGM再生する関数
+//// ==============================
+//function setupFirstClick() {
+//    // 最初のクリックで音楽を再生する
+//    document.body.addEventListener("click", () => {
+//        bgm.play();  // 音楽を再生
+//        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
+//    }, { once: true }); // 1回だけ反応する
+//}
+
+//// ==============================
+//// 音楽ON/OFFボタンを設定する関数
+//// ==============================
+//function setupToggleButton() {
+//    if (!toggleBtn) return; // ボタンがなかったら何もしない
+
+//    toggleBtn.addEventListener("click", () => {
+//        if (bgm.paused) {
+//            bgm.play(); // 音楽を再生
+//            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
+//        } else {
+//            bgm.pause(); // 音楽を停止
+//            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
+//        }
+//    });
+//}
+
+// Web Audio API を使ったサウンド管理
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const audioBuffers = {};
+
+function loadSound(name, url) {
+    fetch(url)
+        .then(response => response.arrayBuffer())
+        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+        .then(audioBuffer => {
+            audioBuffers[name] = audioBuffer;
+        })
+        .catch(e => console.error(`音声 ${name} の読み込みに失敗しました:`, e));
 }
 
-// ==============================
-// 最初のクリックでBGM再生する関数
-// ==============================
-function setupFirstClick() {
-    // 最初のクリックで音楽を再生する
-    document.body.addEventListener("click", () => {
-        bgm.play();  // 音楽を再生
-        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
-    }, { once: true }); // 1回だけ反応する
+function playSound(name) {
+    const buffer = audioBuffers[name];
+    if (!buffer) return;
+
+    const source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioContext.destination);
+    source.start(0);
 }
 
-// ==============================
-// 音楽ON/OFFボタンを設定する関数
-// ==============================
-function setupToggleButton() {
-    if (!toggleBtn) return; // ボタンがなかったら何もしない
+loadSound("choice", "choice.mp3");
+loadSound("click", "click.mp3");
+loadSound("bgm", "loop_maou_bgm.mp3");
 
-    toggleBtn.addEventListener("click", () => {
-        if (bgm.paused) {
-            bgm.play(); // 音楽を再生
-            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
-        } else {
-            bgm.pause(); // 音楽を停止
-            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
-        }
-    });
-}
 
+//// 最初のクリックでBGM再生する関数
+document.addEventListener('click', () => {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });  // 最初の1回だけ
 
 
 let selectedCharacter = null;
@@ -267,47 +303,28 @@ let currentCategory = "eyes";
 const buttons = document.querySelectorAll('button');
 
 // ===== 効果音の準備 =====
-//const choiceSound = document.getElementById("se-choice");
-//const clickSound = document.getElementById("se-click");
-
-// 複数の音を配列で用意（3つずつ）
-const choiceSounds = [
-    document.getElementById("se-choice1"),
-    document.getElementById("se-choice2"),
-    document.getElementById("se-choice3")
-];
-const clickSounds = [
-    document.getElementById("se-click1"),
-    document.getElementById("se-click2"),
-    document.getElementById("se-click3")
-];
-
-let choiceIndex = 0;
-let clickIndex = 0;
-
-// 効果音再生用の関数
-function playChoiceSound() {
-    const sound = choiceSounds[choiceIndex];
-    sound.currentTime = 0;
-    sound.play().catch(() => { });
-    choiceIndex = (choiceIndex + 1) % choiceSounds.length;
-}
-function playClickSound() {
-    const sound = clickSounds[clickIndex];
-    sound.currentTime = 0;
-    sound.play().catch(() => { });
-    clickIndex = (clickIndex + 1) % clickSounds.length;
-}
+const choiceSound = document.getElementById("se-choice");
+const clickSound = document.getElementById("se-click");
 
 // ===== スタートボタンの処理 =====
-//function goToCharacterSelect() {
-//    // choice.mp3 を鳴らす
-//    choiceSound.currentTime = 0;
-//    choiceSound.play();
 
-window.goToCharacterSelect = function () {
-    playChoiceSound();
-/*}*/
+
+function goToCharacterSelect() {
+    // choice.mp3 を鳴らす
+    playSound("choice");
+    //choiceSound.currentTime = 0;
+    //choiceSound.play();
+
+    function playBGM() {
+        const buffer = audioBuffers["bgm"];
+        if (!buffer) return;
+
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        source.connect(audioContext.destination);
+        source.start(0);
+    }
 
     // トップ画面（start-screen）を非表示にして、（select-screen）を表示
     // スクリーン切り替え
@@ -374,7 +391,8 @@ function selectCharacter(characterId) {
 document.querySelectorAll("button").forEach(button => {
     if (button.id !== "start-btn") {
         button.addEventListener("click", () => {
-            playClickSound();
+            playSound("click");
+
         //    clickSound.currentTime = 0;
         //    clickSound.play();
         });
