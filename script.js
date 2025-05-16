@@ -22,6 +22,9 @@ function playSound(name) {
     source.start(0);
 }
 
+//loadSound("choice", "choice.mp3");
+//loadSound("click", "click.mp3");
+//loadSound("bgm", "loop_maou_bgm.mp3");
 
 
 //// 最初のクリックでBGM再生する関数
@@ -270,7 +273,17 @@ Promise.all([
     console.log("すべての音声ファイルが読み込まれました！");
 });
 
+//function goToCharacterSelect() {
+//    // 効果音 choice.mp3 を鳴らす
+//    //playSound("choice");
 
+//    // BGM を再生する（事前に読み込まれている前提）
+//    playBGM();
+
+//    // トップ画面を非表示、キャラ選択画面を表示
+//    document.getElementById("start-screen").style.display = "none";
+//    document.getElementById("select-screen").style.display = "block";
+//}
 
 // BGMを再生する関数（再生前に読み込み確認）
 function playBGM() {
@@ -608,26 +621,23 @@ function renderSaveSlots() {
 const compleButton = document.getElementById("comple-button");
 
 compleButton.onclick = () => {
-    // --- 画面遷移前にアニメーション対象をリセット ---
+    // --- アニメーション対象をリセット ---
     const frame = document.getElementById('frameImage');
     const thankText = document.getElementById('thankText');
     const bagClose = document.getElementById('bagClose');
     const bagOpen = document.getElementById('bagOpen');
 
-
-    // 対象要素を初期状態に戻す（hidden付与、アニメーション用クラス削除）
     [frame, thankText, bagClose, bagOpen].forEach(el => {
-        el.classList.add('hidden');  // hiddenクラスを追加
-        el.classList.remove('fadeIn', 'zoomIn_t', 'fadeIn1', 'zoomOut', 'zoomIn', 'fadeOut', 'fadeIn2'); // アニメーション系クラスだけ削除
+        el.classList.add('hidden');
+        el.classList.remove('fadeIn', 'zoomIn_t', 'fadeIn1', 'zoomOut', 'zoomIn', 'fadeOut', 'fadeIn2');
     });
 
-    // 1. キャラクターを自動保存（枠4）
+    // 1. キャラクターを自動保存
     const autoSaveKey = `favorite_${selectedCharacter}_4`;
     localStorage.setItem(autoSaveKey, JSON.stringify(selectedItems));
-    // 2. メッセージを表示
     alert("コーディネートを自動保存しました！");
 
-    // 2. 画面切り替え（game-screen → comple-screen）
+    // 2. 画面切り替え
     document.getElementById("game-screen").style.display = "none";
     const compleScreen = document.getElementById("comple-screen");
     compleScreen.style.display = "block";
@@ -636,50 +646,46 @@ compleButton.onclick = () => {
     const container = document.getElementById("completion-container");
     container.innerHTML = "";
 
-   /* setTimeout(() => {*/
-        const characterContainer = document.createElement("div");
-        characterContainer.className = "anime-object hidden";
-        container.appendChild(characterContainer);
+    // キャラクター表示用コンテナ作成
+    const characterContainer = document.createElement("div");
+    characterContainer.className = "anime-object hidden";
+    container.appendChild(characterContainer);
 
-        // body画像
-        const bodyImg = document.createElement("img");
-        bodyImg.src = `images/${selectedCharacter}body_mw.webp`;
-        characterContainer.appendChild(bodyImg);
+    // body画像
+    const bodyImg = document.createElement("img");
+    bodyImg.src = `images/${selectedCharacter}body_mw.webp`;
+    characterContainer.appendChild(bodyImg);
 
-        // 他のパーツ
-        const parts = ["body", "eyes", "clothes", "hair", "ac2", "ac3"];
-        parts.forEach(part => {
-            const index = selectedItems[part];
-            if (index !== null) {
-                const partImg = document.createElement("img");
-                partImg.src = items[selectedCharacter][part][index].src;
-                characterContainer.appendChild(partImg);
-            }
-        });
+    // 他のパーツ
+    const parts = ["body", "eyes", "clothes", "hair", "ac2", "ac3"];
+    parts.forEach(part => {
+        const index = selectedItems[part];
+        if (index !== null) {
+            const partImg = document.createElement("img");
+            partImg.src = items[selectedCharacter][part][index].src;
+            characterContainer.appendChild(partImg);
+        }
+    });
 
-
-    // ステップ0：frameを最初に表示
+    // アニメーション処理
     frame.classList.remove('hidden');
     frame.classList.add('fadeIn');
 
-    // ステップ0.5：Thank you表示（zoomIn）
     setTimeout(() => {
         thankText.classList.remove('hidden');
         thankText.classList.add('zoomIn_t');
     }, 1200);
 
-    // ステップ1：bag_close 表示 → 消す
     setTimeout(() => {
         bagClose.classList.remove('hidden');
         bagClose.classList.add('fadeIn1');
     }, 2400);
 
     setTimeout(() => {
-        bagClose.classList.remove('fadeIn');
+        bagClose.classList.remove('fadeIn1');
         bagClose.classList.add('zoomOut');
     }, 4400);
 
-    // ステップ2：bag_open 表示 → 消す
     setTimeout(() => {
         bagClose.classList.add('hidden');
         bagOpen.classList.remove('hidden');
@@ -691,36 +697,31 @@ compleButton.onclick = () => {
         bagOpen.classList.add('fadeOut');
     }, 5800);
 
-    // ステップ3：icon_body 表示（アニメF）
     setTimeout(() => {
         bagOpen.classList.add('hidden');
         characterContainer.classList.remove('hidden');
         characterContainer.classList.add('fadeIn2');
     }, 7600);
 
-    // 6. 画面下部に「トップ画面に戻る」ボタン表示
+    // 「トップ画面へ」ボタン
     setTimeout(() => {
         const backBtn = document.createElement("button");
         backBtn.textContent = "トップ画面へ";
         backBtn.className = "back-to-top";
-
-        //backBtn.onclick = () => {
-        //    stopBGM(); // ← まずBGMを止める
-
+        backBtn.onclick = () => {
             compleScreen.style.display = "none";
             document.getElementById("start-screen").style.display = "block";
         };
         container.appendChild(backBtn);
 
-    // 6. 画面下部に「ハニットHP」ボタン表示
-    const linkBtn = document.createElement("button");
-    linkBtn.textContent = "ハニットHPへ"; // ← ボタンに表示する文字
-    linkBtn.className = "back-to-top";
-    linkBtn.style.marginTop = "380px"; // 「トップへ戻る」より下に見せるため余白を変更
-    linkBtn.onclick = () => {
-        window.open("https://hanitto8210.storeinfo.jp/", "_blank"); // ← 任意リンク（新しいタブで開く）
-    };
-    container.appendChild(linkBtn);
-}, 8000);
-
+        // 「ハニットHPへ」ボタン
+        const linkBtn = document.createElement("button");
+        linkBtn.textContent = "ハニットHPへ";
+        linkBtn.className = "back-to-top";
+        linkBtn.style.marginTop = "380px";
+        linkBtn.onclick = () => {
+            window.open("https://hanitto8210.storeinfo.jp/", "_blank");
+        };
+        container.appendChild(linkBtn);
+    }, 8000);
 };
