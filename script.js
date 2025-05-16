@@ -1,7 +1,18 @@
 // Web Audio API を使ったサウンド管理
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const audioBuffers = {};
+const seFiles = {
+    click: "click.ogg", // ←ここは.mp3でも.wavでもOK
+};
 
+async function loadAllAudio() {
+    for (const [name, path] of Object.entries(seFiles)) {
+        const res = await fetch(path);
+        const arrayBuffer = await res.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        audioBuffers[name] = audioBuffer;
+    }
+}
 function loadSound(name, url) {
     return fetch(url)
         .then(response => response.arrayBuffer())
