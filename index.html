@@ -14,17 +14,7 @@
 
 </head>
 <body>
-    <audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>
-
-    <!-- 効果音 choice.mp3 を3つ用意 -->
-    <audio id="se-choice1" src="choice.mp3" preload="auto"></audio>
-    <audio id="se-choice2" src="choice.mp3" preload="auto"></audio>
-    <audio id="se-choice3" src="choice.mp3" preload="auto"></audio>
-
-    <!-- 効果音 click.mp3 を3つ用意 -->
-    <audio id="se-click1" src="click.mp3" preload="auto"></audio>
-    <audio id="se-click2" src="click.mp3" preload="auto"></audio>
-    <audio id="se-click3" src="click.mp3" preload="auto"></audio>
+    <!--<audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>-->
 
     <!-- スタート画面 -->
     <!--<audio id="se-choice" src="choice.mp3" preload="auto"></audio>
@@ -79,8 +69,8 @@
                 <button class="category-button" onclick="showItems('ac3')">
                     <img src="category_head3.png" alt="アクセサリー3" class="icon-img">
 
-                </button>
-            </div>
+            </button>
+</div>
 
             <div id="item-list"></div>
         </div>
@@ -129,18 +119,18 @@
     </div>
 
 
-    <!-- 保存・読み込み画面（初期は非表示） -->
-    <div id="save-load-screen" style="display: none;">
-        <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
-        <span class="save-text">Save</span>
-        <div id="slots-container"></div>
-    </div>
+        <!-- 保存・読み込み画面（初期は非表示） -->
+        <div id="save-load-screen" style="display: none;">
+            <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
+            <span class="save-text">Save</span>
+            <div id="slots-container"></div>
+        </div>
 
 
-    <div id="music-toggle-button">
-        <button id="toggle-music">♪ OFF</button>
-    </div>
+        <div id="music-toggle-button">
+            <button id="toggle-music">♪ OFF</button>
+        </div>
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 </body>
 </html>
