@@ -58,16 +58,10 @@ function stopSound(name) {
 
 // === イベント処理 ===
 
-// 初回クリックで再生許可
-document.addEventListener("click", () => {
-    if (audioContext.state === "suspended") {
-        audioContext.resume();
-    }
-}, { once: true });
 
 // スタートボタンの処理
 async function goToCharacterSelect() {
-    // ユーザー操作で AudioContext を再開
+    // スマホ対応：クリック時に AudioContext を resume（再開）
     if (audioContext.state === "suspended") {
         await audioContext.resume();
     }
