@@ -1,133 +1,60 @@
-// ===== 効果音（SE）用クラス =====
-class Se {
-    constructor(parentElement, src, channels = 4) {
-        this._tags = [];
 
-        for (let i = 0; i < channels; i++) {
-            const audio = document.createElement("audio");
-            audio.src = src;
-            audio.preload = "auto";
-            parentElement.appendChild(audio);
-            this._tags.push(audio);
-        }
+// ==============================
+// 初期設定
+// ==============================
 
-        this._channel = 0;
-    }
+// BGMの要素とボタンの要素を取得
+const bgm = document.getElementById("bgm");
+const toggleBtn = document.getElementById("toggle-music"); // ボタンのIDを修正
+const startScreen = document.getElementById("start-screen"); // start-screenを取得
 
-    play() {
-        this._channel = (this._channel + 1) % this._tags.length;
-        const audio = this._tags[this._channel];
-
-        // 途中なら強制リセット
-        if (!audio.ended && audio.currentTime > 0) {
-            audio.pause();
-            audio.currentTime = 0;
-        }
-
-        audio.play().catch(err => {
-            console.warn("音声の再生に失敗:", err);
-        });
-    }
-
-    stop() {
-        for (const audio of this._tags) {
-            audio.pause();
-            audio.currentTime = 0;
-        }
-    }
-}
-
-// ===== BGM用: Web Audio API =====
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-let bgmBuffer = null;
-let bgmSource = null;
-
-// BGMの読み込み
-async function loadBGM() {
-    const res = await fetch("loop_maou_bgm.mp3");
-    const buf = await res.arrayBuffer();
-    bgmBuffer = await audioContext.decodeAudioData(buf);
-}
-
-// BGM再生
-function playBGM() {
-    if (!bgmBuffer || bgmSource) return;
-
-    bgmSource = audioContext.createBufferSource();
-    bgmSource.buffer = bgmBuffer;
-    bgmSource.loop = true;
-    bgmSource.connect(audioContext.destination);
-    bgmSource.start();
-}
-
-// BGM停止
-function stopBGM() {
-    if (bgmSource) {
-        bgmSource.stop();
-        bgmSource.disconnect();
-        bgmSource = null;
-    }
-}
-
-// ===== ページ読み込み後の処理 =====
-const se = {};  // 効果音オブジェクトを格納
-window.addEventListener("DOMContentLoaded", async () => {
-    const parent = document.body;
-
-    // 効果音の準備
-    se.click = new Se(parent, "click.wav", 4);
-    se.choice = new Se(parent, "choice.mp3", 4);
-
-    await loadBGM();
-
-    // ✅ 全ボタンにクリック音を設定（スタートボタン以外）
-    document.querySelectorAll("button").forEach(button => {
-        if (button.id !== "start-btn") {
-            button.addEventListener("click", () => {
-                se.click.play();
-            });
-        }
-    });
-
-    // 音楽ON/OFFボタンの設定
-    const toggleBtn = document.getElementById("toggle-music");
-    toggleBtn.addEventListener("click", () => {
-        if (bgmSource) {
-            stopBGM();
-            toggleBtn.textContent = "♪ ON";
-        } else {
-            playBGM();
-            toggleBtn.textContent = "♪ OFF";
-        }
-    });
-
-    // スタートボタンの設定
-    document.getElementById("start-btn").addEventListener("click", async () => {
-        // スマホ対応：AudioContext が止まっていれば再開
-        if (audioContext.state === "suspended") {
-            await audioContext.resume();
-        }
-
-        se.choice.play();
-        playBGM();
-
-        document.getElementById("start-screen").style.display = "none";
-        document.getElementById("select-screen").style.display = "block";
-    });
+// ページがロードされたら初期化する
+window.addEventListener("DOMContentLoaded", () => {
+    setupBGM();           // BGMの初期設定
+    setupFirstClick();     // 最初のクリックで音楽再生
+    setupToggleButton();   // 音楽ON/OFFボタンの設定
 });
 
+// ==============================
+// BGMを準備する関数
+// ==============================
+function setupBGM() {
+    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
+    bgm.pause();         // 初期状態で音楽を停止
+    toggleBtn.style.display = "block"; // ボタンを表示
+    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
+}
 
-//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-//document.querySelectorAll("button").forEach(button => {
-//    if (button.id !== "start-btn") {
-//        button.addEventListener("click", () => {
-//            playSound("click");
+// ==============================
+// 最初のクリックでBGM再生する関数
+// ==============================
+function setupFirstClick() {
+    // 最初のクリックで音楽を再生する
+    document.body.addEventListener("click", () => {
+        bgm.play();  // 音楽を再生
+        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
+    }, { once: true }); // 1回だけ反応する
+}
 
-//        });
-//    }
-//});
+// ==============================
+// 音楽ON/OFFボタンを設定する関数
+// ==============================
+function setupToggleButton() {
+    if (!toggleBtn) return; // ボタンがなかったら何もしない
 
+    toggleBtn.addEventListener("click", () => {
+        if (bgm.paused) {
+            bgm.play(); // 音楽を再生
+            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
+        } else {
+            bgm.pause(); // 音楽を停止
+            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
+        }
+    });
+}
 
+// ===== 効果音の準備 、完成画面用=====
+const compSound = document.getElementById("compSound");
 
 let selectedCharacter = null;
 
@@ -135,7 +62,7 @@ let selectedCharacter = null;
 const items = {
     R: {
         body: [
-            /*            { name: "ボディ-MW", src: "images/Rbody_mw.webp" }, *//*デフォルトなので選択肢から除外*/
+/*            { name: "ボディ-MW", src: "images/Rbody_mw.webp" }, *//*デフォルトなので選択肢から除外*/
             { name: "ボディ-SW", src: "images/Rbody_sw.webp" },
             { name: "ボディ-G", src: "images/Rbody_g.webp" },
             { name: "ボディ-B", src: "images/Rbody_b.webp" },
@@ -196,7 +123,7 @@ const items = {
             { name: "Rflowre_b_y", src: "images/Rflowre_b_y.webp", icon: "images/icons/Rflowre_b_y_icon.webp" },
             { name: "Rflowre_r_p", src: "images/Rflowre_r_p.webp", icon: "images/icons/Rflowre_r_p_icon.webp" },
             { name: "Rflowre_y_r", src: "images/Rflowre_y_r.webp", icon: "images/icons/Rflowre_y_r_icon.webp" },
-
+            
         ],
 
         ac3: [
@@ -335,10 +262,25 @@ const items = {
     }
 };
 
-let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null };
+let selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3:null };
 let currentCategory = "eyes";
 
+// ボタンを取得
+const buttons = document.querySelectorAll('button');
 
+//// ===== 効果音の準備 =====
+//const choiceSound = document.getElementById("se-choice");
+//const clickSound = document.getElementById("se-click");
+
+// ===== スタートボタンの処理 =====
+function goToCharacterSelect() {
+
+    // トップ画面（start-screen）を非表示にして、（select-screen）を表示
+    // スクリーン切り替え
+    document.getElementById("start-screen").style.display = "none";
+    document.getElementById("select-screen").style.display = "block";
+
+}
 
 // ===== キャラ選択時の処理 =====
 function selectCharacter(characterId) {
@@ -373,8 +315,36 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
+//function selectCharacter(characterId) {
+//    selectedCharacter = characterId;
 
+//    console.log("選ばれたキャラ", characterId);
 
+//        document.getElementById("select-screen").style.display = "none";
+//        document.getElementById("game-screen").style.display = "block";
+
+//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
+
+//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
+//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
+//        selectedItems[part] = null;
+//        const partImg = document.getElementById(`character-${part}`);
+//        partImg.src = "";
+//        partImg.style.display = "none";
+//    }
+
+//    showItems("body");
+//}
+
+//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+//document.querySelectorAll("button").forEach(button => {
+//    if (button.id !== "start-btn") {
+//        button.addEventListener("click", () => {
+//            clickSound.currentTime = 0;
+//            clickSound.play();
+//        });
+//    }
+//});
 
 function showItems(category) {
     currentCategory = category;
@@ -439,7 +409,7 @@ function showItems(category) {
             (category === "clothes" && label === "コスチューム") ||
             (category === "hair" && label === "アクセサリー") ||
             (category === "ac2" && label === "アクセサリー2") ||
-            (category === "ac3" && label === "アクセサリー3")
+            (category === "ac3" && label === "アクセサリー3") 
         ) {
             btn.classList.add("active");
         }
@@ -530,13 +500,13 @@ function renderSaveSlots() {
 
         // 保存・読み込みボタン
         if (i !== 4) {
-            const saveBtn = document.createElement("button");
-            saveBtn.textContent = `保存 ${i} `;
-            saveBtn.onclick = () => {
-                localStorage.setItem(key, JSON.stringify(selectedItems));
-                alert(`保存枠 ${i} に保存しました！`);
-                renderSaveSlots();
-            };
+        const saveBtn = document.createElement("button");
+        saveBtn.textContent = `保存 ${i} `;
+        saveBtn.onclick = () => {
+            localStorage.setItem(key, JSON.stringify(selectedItems));
+            alert(`保存枠 ${i} に保存しました！`);
+            renderSaveSlots();
+        };
             slot.appendChild(saveBtn);
         }
 
@@ -578,71 +548,89 @@ function renderSaveSlots() {
 const compleButton = document.getElementById("comple-button");
 
 compleButton.onclick = () => {
-    // --- アニメーション対象をリセット ---
+
+    // --- 画面遷移前にアニメーション対象をリセット ---
     const frame = document.getElementById('frameImage');
     const thankText = document.getElementById('thankText');
     const bagClose = document.getElementById('bagClose');
     const bagOpen = document.getElementById('bagOpen');
 
+
+    // 対象要素を初期状態に戻す（hidden付与、アニメーション用クラス削除）
     [frame, thankText, bagClose, bagOpen].forEach(el => {
-        el.classList.add('hidden');
-        el.classList.remove('fadeIn', 'zoomIn_t', 'fadeIn1', 'zoomOut', 'zoomIn', 'fadeOut', 'fadeIn2');
+        el.classList.add('hidden');  // hiddenクラスを追加
+        el.classList.remove('fadeIn', 'zoomIn_t', 'fadeIn1', 'zoomOut', 'zoomIn', 'fadeOut', 'fadeIn2'); // アニメーション系クラスだけ削除
     });
 
-    // 1. キャラクターを自動保存
+    // 1. キャラクターを自動保存（枠4）
     const autoSaveKey = `favorite_${selectedCharacter}_4`;
     localStorage.setItem(autoSaveKey, JSON.stringify(selectedItems));
+    // 2. メッセージを表示
     alert("コーディネートを自動保存しました！");
 
-    // 2. 画面切り替え
+    // 2. 画面切り替え（game-screen → comple-screen）
     document.getElementById("game-screen").style.display = "none";
     const compleScreen = document.getElementById("comple-screen");
     compleScreen.style.display = "block";
 
-    // 表示領域をクリア
-    const container = document.getElementById("completion-container");
-    container.innerHTML = "";
 
-    // キャラクター表示用コンテナ作成
-    const characterContainer = document.createElement("div");
-    characterContainer.className = "anime-object hidden";
-    container.appendChild(characterContainer);
-
-    // body画像
-    const bodyImg = document.createElement("img");
-    bodyImg.src = `images/${selectedCharacter}body_mw.webp`;
-    characterContainer.appendChild(bodyImg);
-
-    // 他のパーツ
-    const parts = ["body", "eyes", "clothes", "hair", "ac2", "ac3"];
-    parts.forEach(part => {
-        const index = selectedItems[part];
-        if (index !== null) {
-            const partImg = document.createElement("img");
-            partImg.src = items[selectedCharacter][part][index].src;
-            characterContainer.appendChild(partImg);
+    // 実行タイミングを遅らせるための処理（効果音と表示）
+    setTimeout(() => {
+        // ✅ 効果音を再生
+        const compSound = document.getElementById("comp.mp3");
+        if (compSound) {
+            compSound.currentTime = 0;
+            compSound.play().catch(err => {
+                console.warn("音声再生エラー:", err);
+            });
         }
-    });
 
-    // アニメーション処理
+        // ✅ キャラ表示を開始（効果音と同じタイミング）
+        const container = document.getElementById("completion-container");
+        container.innerHTML = ""; // 念のためここで空にするのが安全
+
+        const characterContainer = document.createElement("div");
+        characterContainer.className = "anime-object hidden";
+        container.appendChild(characterContainer);
+
+        const bodyImg = document.createElement("img");
+        bodyImg.src = `images/${selectedCharacter}body_mw.webp`;
+        characterContainer.appendChild(bodyImg);
+
+        const parts = ["body", "eyes", "clothes", "hair", "ac2", "ac3"];
+        parts.forEach(part => {
+            const index = selectedItems[part];
+            if (index !== null) {
+                const partImg = document.createElement("img");
+                partImg.src = items[selectedCharacter][part][index].src;
+                characterContainer.appendChild(partImg);
+            }
+
+        });
+
+
+    // ステップ0：frameを最初に表示
     frame.classList.remove('hidden');
     frame.classList.add('fadeIn');
 
+    // ステップ0.5：Thank you表示（zoomIn）
     setTimeout(() => {
         thankText.classList.remove('hidden');
         thankText.classList.add('zoomIn_t');
     }, 1200);
 
+    // ステップ1：bag_close 表示 → 消す
     setTimeout(() => {
         bagClose.classList.remove('hidden');
         bagClose.classList.add('fadeIn1');
     }, 2400);
 
     setTimeout(() => {
-        bagClose.classList.remove('fadeIn1');
+        bagClose.classList.remove('fadeIn');
         bagClose.classList.add('zoomOut');
     }, 4400);
 
+    // ステップ2：bag_open 表示 → 消す
     setTimeout(() => {
         bagClose.classList.add('hidden');
         bagOpen.classList.remove('hidden');
@@ -654,31 +642,34 @@ compleButton.onclick = () => {
         bagOpen.classList.add('fadeOut');
     }, 5800);
 
+    // ステップ3：icon_body 表示（アニメF）
     setTimeout(() => {
         bagOpen.classList.add('hidden');
         characterContainer.classList.remove('hidden');
         characterContainer.classList.add('fadeIn2');
     }, 7600);
 
-    // 「トップ画面へ」ボタン
+    // 6. 画面下部に「トップ画面に戻る」ボタン表示
     setTimeout(() => {
         const backBtn = document.createElement("button");
         backBtn.textContent = "トップ画面へ";
-        backBtn.className = "back-to-top";
+        backBtn.className = "back-to-top"; // ← ここでCSSのクラス名だけ指定
         backBtn.onclick = () => {
             compleScreen.style.display = "none";
             document.getElementById("start-screen").style.display = "block";
         };
         container.appendChild(backBtn);
 
-        // 「ハニットHPへ」ボタン
-        const linkBtn = document.createElement("button");
-        linkBtn.textContent = "ハニットHPへ";
-        linkBtn.className = "back-to-top";
-        linkBtn.style.marginTop = "380px";
-        linkBtn.onclick = () => {
-            window.open("https://hanitto8210.storeinfo.jp/", "_blank");
-        };
-        container.appendChild(linkBtn);
+    // 6. 画面下部に「ハニットHP」ボタン表示
+    const linkBtn = document.createElement("button");
+    linkBtn.textContent = "ハニットHPへ"; // ← ボタンに表示する文字
+    linkBtn.className = "back-to-top";
+    linkBtn.style.marginTop = "380px"; // 「トップへ戻る」より下に見せるため余白を変更
+    linkBtn.onclick = () => {
+        window.open("https://hanitto8210.storeinfo.jp/", "_blank"); // ← 任意リンク（新しいタブで開く）
+    };
+    container.appendChild(linkBtn);
     }, 8000);
+    }, 100); // 0.1秒待ってから実行
+
 };
