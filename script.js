@@ -1,103 +1,111 @@
-// === AudioContext & 音声管理 ===
+// ===== 効果音（SE）用クラス =====
+class Se {
+    constructor(parentElement, src, channels = 4) {
+        this._tags = [];
+
+        for (let i = 0; i < channels; i++) {
+            const audio = document.createElement("audio");
+            audio.src = src;
+            audio.preload = "auto";
+            parentElement.appendChild(audio);
+            this._tags.push(audio);
+        }
+
+        this._channel = 0;
+    }
+
+    play() {
+        this._channel = (this._channel + 1) % this._tags.length;
+        const audio = this._tags[this._channel];
+
+        // 途中なら強制リセット
+        if (!audio.ended && audio.currentTime > 0) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+
+        audio.play().catch(err => {
+            console.warn("音声の再生に失敗:", err);
+        });
+    }
+
+    stop() {
+        for (const audio of this._tags) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+    }
+}
+
+// ===== BGM用: Web Audio API =====
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const audioBuffers = {};  // 音声データ本体
-const audioSources = {};  // 再生中の音源（停止用）
+let bgmBuffer = null;
+let bgmSource = null;
 
-// 読み込むファイル一覧
-const soundFiles = {
-    click: "click.wav",
-    choice: "choice.mp3",
-    bgm: "loop_maou_bgm.mp3"
-};
-
-// 音声の読み込み
-async function loadSound(name, url) {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-    audioBuffers[name] = audioBuffer;
+// BGMの読み込み
+async function loadBGM() {
+    const res = await fetch("loop_maou_bgm.mp3");
+    const buf = await res.arrayBuffer();
+    bgmBuffer = await audioContext.decodeAudioData(buf);
 }
 
-// 複数の音声を読み込み
-async function loadAllSounds() {
-    const promises = Object.entries(soundFiles).map(([name, path]) =>
-        loadSound(name, path)
-    );
-    await Promise.all(promises);
-    console.log("すべての音声ファイルが読み込まれました！");
+// BGM再生
+function playBGM() {
+    if (!bgmBuffer || bgmSource) return;
+
+    bgmSource = audioContext.createBufferSource();
+    bgmSource.buffer = bgmBuffer;
+    bgmSource.loop = true;
+    bgmSource.connect(audioContext.destination);
+    bgmSource.start();
 }
 
-// 音声の再生（BGMもSEも）
-function playSound(name, loop = false) {
-    const buffer = audioBuffers[name];
-    if (!buffer) {
-        console.warn(`${name} はまだ読み込まれていません`);
-        return;
-    }
-
-    // AudioBufferSourceNode は1回使い切り
-    const source = audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.loop = loop;
-    source.connect(audioContext.destination);
-    source.start(0);
-
-    // BGMなど停止が必要な音用に保存
-    audioSources[name] = source;
-}
-
-// 音声の停止（主にBGM用）
-function stopSound(name) {
-    const source = audioSources[name];
-    if (source) {
-        source.stop();
-        source.disconnect();
-        delete audioSources[name];
+// BGM停止
+function stopBGM() {
+    if (bgmSource) {
+        bgmSource.stop();
+        bgmSource.disconnect();
+        bgmSource = null;
     }
 }
 
-// === イベント処理 ===
+// ===== ページ読み込み後の処理 =====
+const se = {};  // 効果音オブジェクトを格納
+window.addEventListener("DOMContentLoaded", async () => {
+    const parent = document.body;
 
+    // 効果音オブジェクトを生成（チャンネル数は必要に応じて）
+    se.click = new Se(parent, "click.wav", 4);
+    se.choice = new Se(parent, "choice.mp3", 4);
 
-// スタートボタンの処理
-async function goToCharacterSelect() {
-    // スマホ対応：クリック時に AudioContext を resume（再開）
-    if (audioContext.state === "suspended") {
-        await audioContext.resume();
-    }
+    await loadBGM();
 
-    playSound("choice");
-    playSound("bgm", true); // BGM再生（ループ）
-
-    document.getElementById("start-screen").style.display = "none";
-    document.getElementById("select-screen").style.display = "block";
-}
-
-
-// 音楽ON/OFF切り替え
-function setupMusicControls(toggleBtn) {
+    // 音楽ON/OFFボタンの設定
+    const toggleBtn = document.getElementById("toggle-music");
     toggleBtn.addEventListener("click", () => {
-        if (audioSources["bgm"]) {
-            stopSound("bgm");
+        if (bgmSource) {
+            stopBGM();
             toggleBtn.textContent = "♪ ON";
         } else {
-            playSound("bgm", true);
+            playBGM();
             toggleBtn.textContent = "♪ OFF";
         }
     });
-}
 
-// 起動時の準備
-window.addEventListener("DOMContentLoaded", async () => {
-    await loadAllSounds(); // 全音声読み込みが終わるまで待つ
+    // スタートボタンの設定
+    document.getElementById("start-btn").addEventListener("click", async () => {
+        if (audioContext.state === "suspended") {
+            await audioContext.resume();
+        }
 
-    // 音量切り替えボタン
-    const toggleBtn = document.getElementById("toggle-music");
-    setupMusicControls(toggleBtn);
+        se.choice.play();
+        playBGM();
 
-    // スタートボタンのイベント設定
-    document.getElementById("start-btn").addEventListener("click", goToCharacterSelect);
-})
+        document.getElementById("start-screen").style.display = "none";
+        document.getElementById("select-screen").style.display = "block";
+    });
+});
+
 
 
 let selectedCharacter = null;
