@@ -74,11 +74,20 @@ const se = {};  // 効果音オブジェクトを格納
 window.addEventListener("DOMContentLoaded", async () => {
     const parent = document.body;
 
-    // 効果音オブジェクトを生成（チャンネル数は必要に応じて）
+    // 効果音の準備
     se.click = new Se(parent, "click.wav", 4);
     se.choice = new Se(parent, "choice.mp3", 4);
 
     await loadBGM();
+
+    // ✅ 全ボタンにクリック音を設定（スタートボタン以外）
+    document.querySelectorAll("button").forEach(button => {
+        if (button.id !== "start-btn") {
+            button.addEventListener("click", () => {
+                se.click.play();
+            });
+        }
+    });
 
     // 音楽ON/OFFボタンの設定
     const toggleBtn = document.getElementById("toggle-music");
@@ -90,23 +99,14 @@ window.addEventListener("DOMContentLoaded", async () => {
             playBGM();
             toggleBtn.textContent = "♪ OFF";
         }
-
     });
 
     // スタートボタンの設定
     document.getElementById("start-btn").addEventListener("click", async () => {
+        // スマホ対応：AudioContext が止まっていれば再開
         if (audioContext.state === "suspended") {
             await audioContext.resume();
         }
-
-        // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-        document.querySelectorAll("button").forEach(button => {
-            if (button.id !== "start-btn") {
-                button.addEventListener("click", () => {
-                    se.click.play();
-                });
-            }
-        });
 
         se.choice.play();
         playBGM();
@@ -115,6 +115,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("select-screen").style.display = "block";
     });
 });
+
 
 //// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
 //document.querySelectorAll("button").forEach(button => {
