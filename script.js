@@ -1,4 +1,3 @@
-
 // ==============================
 // 初期設定
 // ==============================
@@ -22,7 +21,7 @@ function setupBGM() {
     bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
     bgm.pause();         // 初期状態で音楽を停止
     toggleBtn.style.display = "block"; // ボタンを表示
-    toggleBtn.textContent = "♪ OFF";  // ボタンの初期テキストを「♪ OFF」に設定
+    toggleBtn.textContent = "♪ BGM OFF";  // ボタンの初期テキストを「♪ OFF」に設定
 }
 
 // ==============================
@@ -32,7 +31,7 @@ function setupFirstClick() {
     // 最初のクリックで音楽を再生する
     document.body.addEventListener("click", () => {
         bgm.play();  // 音楽を再生
-        toggleBtn.textContent = "♪ OFF";  // ボタンテキストを「♪ OFF」に変更
+        toggleBtn.textContent = "♪ BGM OFF";  // ボタンテキストを「♪ OFF」に変更
     }, { once: true }); // 1回だけ反応する
 }
 
@@ -45,16 +44,15 @@ function setupToggleButton() {
     toggleBtn.addEventListener("click", () => {
         if (bgm.paused) {
             bgm.play(); // 音楽を再生
-            toggleBtn.textContent = "♪ OFF"; // ボタンのテキストを「♪ OFF」に変更
+            toggleBtn.textContent = "♪ BGM OFF"; // ボタンのテキストを「♪ OFF」に変更
         } else {
             bgm.pause(); // 音楽を停止
-            toggleBtn.textContent = "♪ ON";  // ボタンのテキストを「♪ ON」に変更
+            toggleBtn.textContent = "♪ BGM ON";  // ボタンのテキストを「♪ ON」に変更
         }
     });
 }
 
 let selectedCharacter = null;
-
 
 const items = {
     R: {
@@ -265,7 +263,6 @@ let currentCategory = "eyes";
 // ボタンを取得
 const buttons = document.querySelectorAll('button');
 
-
 // ===== スタートボタンの処理 =====
 function goToCharacterSelect() {
 
@@ -308,8 +305,6 @@ function selectCharacter(characterId) {
 
     showItems("body");
 }
-
-
 function showItems(category) {
     currentCategory = category;
     const list = document.getElementById("item-list");
