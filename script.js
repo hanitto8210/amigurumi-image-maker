@@ -66,14 +66,19 @@ document.addEventListener("click", () => {
 }, { once: true });
 
 // スタートボタンの処理
-function goToCharacterSelect() {
+async function goToCharacterSelect() {
+    // ユーザー操作で AudioContext を再開
+    if (audioContext.state === "suspended") {
+        await audioContext.resume();
+    }
+
     playSound("choice");
-    playSound("bgm", true); // BGMループ再生
+    playSound("bgm", true); // BGM再生（ループ）
 
     document.getElementById("start-screen").style.display = "none";
     document.getElementById("select-screen").style.display = "block";
 }
-document.getElementById("start-btn").addEventListener("click", goToCharacterSelect);
+
 
 // 音楽ON/OFF切り替え
 function setupMusicControls(toggleBtn) {
@@ -90,10 +95,15 @@ function setupMusicControls(toggleBtn) {
 
 // 起動時の準備
 window.addEventListener("DOMContentLoaded", async () => {
-    await loadAllSounds();
+    await loadAllSounds(); // 全音声読み込みが終わるまで待つ
+
+    // 音量切り替えボタン
     const toggleBtn = document.getElementById("toggle-music");
     setupMusicControls(toggleBtn);
-});
+
+    // スタートボタンのイベント設定
+    document.getElementById("start-btn").addEventListener("click", goToCharacterSelect);
+})
 
 
 let selectedCharacter = null;
