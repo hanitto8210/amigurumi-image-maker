@@ -670,6 +670,6 @@ compleButton.onclick = () => {
     };
     container.appendChild(linkBtn);
     }, 8000);
-    }, 100); // 0.1秒待ってから実行
+    }, 50); // 0.05秒待ってから実行
 
 };
