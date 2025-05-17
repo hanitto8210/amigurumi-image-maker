@@ -265,9 +265,6 @@ let currentCategory = "eyes";
 // ボタンを取得
 const buttons = document.querySelectorAll('button');
 
-//// ===== 効果音の準備 =====
-//const choiceSound = document.getElementById("se-choice");
-//const clickSound = document.getElementById("se-click");
 
 // ===== スタートボタンの処理 =====
 function goToCharacterSelect() {
@@ -312,36 +309,6 @@ function selectCharacter(characterId) {
     showItems("body");
 }
 
-//function selectCharacter(characterId) {
-//    selectedCharacter = characterId;
-
-//    console.log("選ばれたキャラ", characterId);
-
-//        document.getElementById("select-screen").style.display = "none";
-//        document.getElementById("game-screen").style.display = "block";
-
-//    document.getElementById("character-base").src = `images/${characterId}body_mw.webp`;
-
-//    selectedItems = { body: null, eyes: null, clothes: null, hair: null, ac2: null, ac3: null};
-//    for (let part of ["body", "eyes", "clothes", "hair", "ac2", "ac3"]) {
-//        selectedItems[part] = null;
-//        const partImg = document.getElementById(`character-${part}`);
-//        partImg.src = "";
-//        partImg.style.display = "none";
-//    }
-
-//    showItems("body");
-//}
-
-//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-//document.querySelectorAll("button").forEach(button => {
-//    if (button.id !== "start-btn") {
-//        button.addEventListener("click", () => {
-//            clickSound.currentTime = 0;
-//            clickSound.play();
-//        });
-//    }
-//});
 
 function showItems(category) {
     currentCategory = category;
