@@ -53,9 +53,6 @@ function setupToggleButton() {
     });
 }
 
-// ===== 効果音の準備 、完成画面用=====
-const compSound = document.getElementById("compSound");
-
 let selectedCharacter = null;
 
 
@@ -547,6 +544,9 @@ function renderSaveSlots() {
 // 完成ボタン取得
 const compleButton = document.getElementById("comple-button");
 
+// ===== 効果音の準備 、完成画面用=====
+const compSound = document.getElementById("compSound");
+
 compleButton.onclick = () => {
 
     // --- 画面遷移前にアニメーション対象をリセット ---
@@ -577,7 +577,7 @@ compleButton.onclick = () => {
     // 実行タイミングを遅らせるための処理（効果音と表示）
     setTimeout(() => {
         // ✅ 効果音を再生
-        const compSound = document.getElementById("comp.mp3");
+        const compSound = document.getElementById("compSound");
         if (compSound) {
             compSound.currentTime = 0;
             compSound.play().catch(err => {
