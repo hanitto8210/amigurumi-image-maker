@@ -353,17 +353,17 @@ function selectCharacter(characterId) {
 }
 
 
-// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-document.querySelectorAll("button").forEach(button => {
-    if (button.id !== "start-btn") {
-        button.addEventListener("click", () => {
-            playSound("click");
+//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+//document.querySelectorAll("button").forEach(button => {
+//    if (button.id !== "start-btn") {
+//        button.addEventListener("click", () => {
+//            playSound("click");
 
-            //    clickSound.currentTime = 0;
-            //    clickSound.play();
-        });
-    }
-});
+//            //    clickSound.currentTime = 0;
+//            //    clickSound.play();
+//        });
+//    }
+//});
 
 function showItems(category) {
     currentCategory = category;
