@@ -90,6 +90,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             playBGM();
             toggleBtn.textContent = "♪ OFF";
         }
+
     });
 
     // スタートボタンの設定
@@ -98,6 +99,15 @@ window.addEventListener("DOMContentLoaded", async () => {
             await audioContext.resume();
         }
 
+        // ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+        document.querySelectorAll("button").forEach(button => {
+            if (button.id !== "start-btn") {
+                button.addEventListener("click", () => {
+                    se.click.play();
+                });
+            }
+        });
+
         se.choice.play();
         playBGM();
 
@@ -105,6 +115,16 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("select-screen").style.display = "block";
     });
 });
+
+//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
+//document.querySelectorAll("button").forEach(button => {
+//    if (button.id !== "start-btn") {
+//        button.addEventListener("click", () => {
+//            playSound("click");
+
+//        });
+//    }
+//});
 
 
 
@@ -353,17 +373,7 @@ function selectCharacter(characterId) {
 }
 
 
-//// ===== 全ボタンにクリック音を追加（スタートボタン以外） =====
-//document.querySelectorAll("button").forEach(button => {
-//    if (button.id !== "start-btn") {
-//        button.addEventListener("click", () => {
-//            playSound("click");
 
-//            //    clickSound.currentTime = 0;
-//            //    clickSound.play();
-//        });
-//    }
-//});
 
 function showItems(category) {
     currentCategory = category;
