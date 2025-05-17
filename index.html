@@ -14,7 +14,7 @@
 
 </head>
 <body>
-    <!--<audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>-->
+    <audio id="bgm" src="loop_maou_bgm.mp3" loop></audio>
 
     <!-- スタート画面 -->
     <!--<audio id="se-choice" src="choice.mp3" preload="auto"></audio>
@@ -23,9 +23,7 @@
     <div id="start-screen">
         <img src="topimage.png" alt="タイトル画像" style="width: 100%; max-width: 400px; display: block; margin: 30px auto;">
         <div class="start-button">
-            <button id="start-btn" class="start-btn">
-                <span class="start-text">START</span>
-            </button>
+            <button class="start-btn" onclick="goToCharacterSelect()"><span class="start-text">START</span></button>
         </div>
 
     </div>
@@ -71,8 +69,8 @@
                 <button class="category-button" onclick="showItems('ac3')">
                     <img src="category_head3.png" alt="アクセサリー3" class="icon-img">
 
-            </button>
-</div>
+                </button>
+            </div>
 
             <div id="item-list"></div>
         </div>
@@ -121,18 +119,20 @@
     </div>
 
 
-        <!-- 保存・読み込み画面（初期は非表示） -->
-        <div id="save-load-screen" style="display: none;">
-            <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
-            <span class="save-text">Save</span>
-            <div id="slots-container"></div>
-        </div>
+    <!-- 保存・読み込み画面（初期は非表示） -->
+    <div id="save-load-screen" style="display: none;">
+        <button id="back-to-game" onclick="closeSaveLoad()">← 戻る</button>
+        <span class="save-text">Save</span>
+        <div id="slots-container"></div>
+    </div>
 
 
-        <div id="music-toggle-button">
-            <button id="toggle-music">♪ OFF</button>
-        </div>
+    <div id="music-toggle-button">
+        <button id="toggle-music">♪ OFF</button>
+    </div>
+    <!--<audio id="comp.mp3" src="comp.mp3" preload="auto"></audio>-->
+    <audio id="compSound" src="sounds/comp.mp3"></audio>
 
-        <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
