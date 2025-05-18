@@ -285,13 +285,13 @@ function selectCharacter(characterId) {
     const charaArea = document.getElementById("character-area");
     charaArea.innerHTML = ""; // 既存の画像をクリア
 
-    const baseParts = ["base", "body", "eyes", "clothes", "hair", "ac2", "ac3"];
-    selectedItems = {};
+    const baseParts = ["base", "body", "eyes", "clothes", "hair", "ac2", "ac3"]; /*キャラパーツ一覧*/
+    selectedItems = {}; /*選択中のパーツを管理する箱*/
 
     baseParts.forEach(part => {
-        const img = document.createElement("img");
-        img.id = `character-${part}`;
-        img.style.display = part === "base" ? "block" : "none";
+        const img = document.createElement("img"); /*パーツの一覧を1個ずつimg画像を作る*/
+        img.id = `character-${part}`; /*画像にIDをつけて、後で操作しやすく、例えばcharacter-eyesとか*/
+        img.style.display = part === "base" ? "block" : "none"; /*最初は体だけ表示、他は隠す*/
 
         if (part === "base") {
             img.src = `images/${characterId}body_mw.webp`;
@@ -342,14 +342,27 @@ function showItems(category) {
 
         img.onclick = () => {
             const partImg = document.getElementById(`character-${category}`);
+            // すでに選択されていた場合：選択を解除
             if (isSelected) {
                 selectedItems[category] = null;
                 partImg.src = "";
                 partImg.style.display = "none";
             } else {
+                // 新しく選択された場合：画像を表示
                 selectedItems[category] = index;
                 partImg.src = item.src;
                 partImg.style.display = "block";
+            }
+
+            // 👇ここが追加部分！ bodyが選ばれているかどうかで base を制御
+            const baseImg = document.getElementById("character-base");
+            if (category === "body") {
+                if (selectedItems["body"] === null) {
+                    baseImg.src = `images/${selectedCharacter}body_mw.webp`;
+                    baseImg.style.display = "block";
+                } else {
+                    baseImg.style.display = "none";
+                }
             }
             showItems(category);
         };
@@ -388,6 +401,11 @@ function resetItems() {
         partImg.src = "";
         partImg.style.display = "none";
     }
+    // ✅ base画像を再表示させる
+    const baseImg = document.getElementById("character-base");
+    baseImg.style.display = "block";
+    baseImg.src = `images/${selectedCharacter}body_mw.webp`;
+
     showItems(currentCategory);
 }
 
@@ -478,8 +496,10 @@ function renderSaveSlots() {
             const data = JSON.parse(localStorage.getItem(key));
             if (data) {
                 selectedItems = data;
+                // 各パーツを順番に処理する
                 for (let part in selectedItems) {
-                    const index = selectedItems[part];
+                    const index = selectedItems[part]; // 保存された選択肢（null か 数字）
+
                     const partImg = document.getElementById(`character-${part}`);
                     if (index !== null) {
                         const item = items[selectedCharacter][part][index];
@@ -489,6 +509,15 @@ function renderSaveSlots() {
                         partImg.src = "";
                         partImg.style.display = "none";
                     }
+                }
+
+                // ✅ base表示を更新（←この位置！）
+                const baseImg = document.getElementById("character-base");
+                if (selectedItems["body"] === null) {
+                    baseImg.src = `images/${selectedCharacter}body_mw.webp`;
+                    baseImg.style.display = "block";
+                } else {
+                    baseImg.style.display = "none";
                 }
                 closeSaveLoad();
                 showItems(currentCategory);
