@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // BGMを準備する関数
 // ==============================
 function setupBGM() {
-    bgm.volume = 0.5;    // 音量を設定 (0〜1の範囲)
+    bgm.volume = 1.0;    // 音量を設定 (0〜1の範囲)
     bgm.pause();         // 初期状態で音楽を停止
     toggleBtn.style.display = "block"; // ボタンを表示
     toggleBtn.textContent = "♪ BGM OFF";  // ボタンの初期テキストを「♪ OFF」に設定
