@@ -201,9 +201,6 @@ const items = {
             { name: "cos_ribbon_bl", src: "images/cos_ribbon_bl.webp", icon: "images/icons/cos_ribbon_bl_icon.webp" },
             { name: "cos_ribbon_pur", src: "images/cos_ribbon_pur.webp", icon: "images/icons/cos_ribbon_pur_icon.webp" },
             { name: "cos_ribbon_w", src: "images/cos_ribbon_w.webp", icon: "images/icons/cos_ribbon_w_icon.webp" },
-            { name: "cos_heart", src: "images/cos_heart.webp", icon: "images/icons/cos_heart_icon.webp" },
-            { name: "cos_cothic_b", src: "images/cos_cothic_b.webp", icon: "images/icons/cos_cothic_b_icon.webp" },
-            { name: "cos_cothic_w", src: "images/cos_cothic_w.webp", icon: "images/icons/cos_cothic_w_icon.webp" },
 
             { name: "cos_c_ribb_wi", src: "images/cos_c_ribb_wi.webp", icon: "images/icons/cos_c_ribb_wi.webp" },
             { name: "cos_c_ribb_cpi", src: "images/cos_c_ribb_cpi.webp", icon: "images/icons/cos_c_ribb_cpi.webp" },
